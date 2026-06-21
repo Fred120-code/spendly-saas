@@ -1,0 +1,19 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: light --default, dark --prefersdark;
+}
+
+/* Blur backdrop for native <dialog> elements */
+dialog::backdrop {
+  background-color: rgb(0, 0, 0);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* Optional: more pronounced blur when modal has class 'modal' */
+dialog.modal::backdrop {
+  background-color: rgb(0, 0, 0);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
