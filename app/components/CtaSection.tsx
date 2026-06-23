@@ -6,7 +6,7 @@ export default function CtaSection() {
       <div className="max-w-3xl mx-auto text-center">
         <h2
           data-aos="fade-up"
-          className="text-white text-3xl sm:text-4xl md:text-5xl font-bold mb-6"
+          className="text-white text-3xl sm:text-3xl md:text-4xl font-bold mb-6"
         >
           Prêt à transformer vos finances ?
         </h2>
@@ -16,7 +16,7 @@ export default function CtaSection() {
           data-aos-delay="100"
           className="text-gray-300 text-lg sm:text-xl md:text-2xl mb-12 leading-relaxed"
         >
-          Rejoignez des milliers d'utilisateurs qui optimisent leur budget avec{" "}
+          Optimisez votre budget dès aujourd&apos;hui avec{" "}
           <span className="text-[#E0FF67] font-semibold">Spendly AI</span>
         </p>
 
