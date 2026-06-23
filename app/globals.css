@@ -2,7 +2,12 @@
 @plugin "daisyui" {
   themes: light --default, dark --prefersdark;
 }
+@import "aos/dist/aos.css";
 
+
+*{
+  scroll-behavior: smooth;
+}
 /* Blur backdrop for native <dialog> elements */
 dialog::backdrop {
   background-color: rgb(0, 0, 0);

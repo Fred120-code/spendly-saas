@@ -81,7 +81,6 @@ const page = () => {
 
       setLoading(false);
     } catch (error) {
-      console.error("Erreur lors de la recupération des données", error);
       setLoading(false);
     }
   };

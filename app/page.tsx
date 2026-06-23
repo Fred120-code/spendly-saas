@@ -1,77 +1,113 @@
 "use client";
-import { Brain, ChartNoAxesCombined, Zap } from "lucide-react";
+import {
+  Brain,
+  ChartNoAxesCombined,
+  Zap,
+  Wallet,
+  Bot,
+  ShieldCheck,
+} from "lucide-react";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
+import HowItWorks from "./components/HowItWorks";
 import FeaturesSection from "./components/FeaturesSection";
-import StatsSection from "./components/StatsSection";
+import TrustSection from "./components/TrustSection";
+import FaqSection from "./components/FaqSection";
 import CtaSection from "./components/CtaSection";
+import Footer from "./components/Footer";
+import AosInit from "./components/AosInit";
 
 export default function Home() {
-
   const features = [
     {
       id: 0,
       icon: Brain,
       title: "Intelligence Artificielle",
       description:
-        "Catégorisation automatique de vos dépenses et recommandations personnalisées.",
+        "Des rapports financiers générés automatiquement par l'IA Gemini, basés sur vos vraies données.",
     },
     {
       id: 1,
       icon: ChartNoAxesCombined,
       title: "Analyses détaillées",
       description:
-        "Visualisez vos habitudes financières avec des graphiques interactifs.",
+        "Visualisez vos habitudes financières avec des graphiques interactifs (répartition, suivi par budget).",
     },
     {
       id: 2,
       icon: Zap,
       title: "Alertes en temps réel",
-      description: "Recevez des notifications lors de dépassements de budget.",
-    },
-  ];
-
-  const stats = [
-    {
-      id: 0,
-      number: "10K+",
-      descriptioin: "Utilisateurs actifs",
+      description: "Soyez prévenu dès qu'un budget approche de sa limite.",
     },
     {
-      id: 1,
-      number: "€2.5M",
-      descriptioin: "Économies générées",
+      id: 3,
+      icon: Wallet,
+      title: "Multi-budgets",
+      description:
+        "Créez autant de budgets que nécessaire : alimentation, transport, loisirs...",
     },
     {
-      id: 2,
-      number: "4.9/5",
-      descriptioin: "Note moyenne",
+      id: 4,
+      icon: Bot,
+      title: "Assistant IA conversationnel",
+      description:
+        "Posez vos questions financières et obtenez des réponses contextualisées à vos données.",
+    },
+    {
+      id: 5,
+      icon: ShieldCheck,
+      title: "Confidentialité",
+      description:
+        "Authentification sécurisée et données strictement isolées par compte.",
     },
   ];
 
   return (
-    <div className="bg-[#151425]">
+    <div className="bg-[#151425] overflow-hidden">
+      <AosInit />
       <div className="flex items-center flex-col w-full bg-blend-overlay">
         <Header />
-        <div>
-          <Hero />
-        </div>
-        <div className="bg-[#e1ff6750] h-[1px] w-full mt-10"></div>
-        <div className="mt-15 mb-15 w-full flex flex-col justify-around items-center">
-          <div className="flex flex-col text-center lg:items-start lg:justify-start mb-6 lg:w-[60%]">
-            <h2 className="text-white font-bold lg:text-3xl">
+
+        <Hero />
+
+        <div className="bg-[#e1ff6750] h-[1px] w-full"></div>
+
+        <HowItWorks />
+
+        <div className="bg-[#e1ff6750] h-[1px] w-full"></div>
+
+        <div
+          id="fonctionnalites"
+          className="mt-15 mb-15 w-full flex flex-col justify-around items-center"
+        >
+          <div
+            data-aos="fade-up"
+            className="flex flex-col text-center lg:items-center lg:justify-center mb-6 lg:w-[60%]"
+          >
+            <h2 className="text-white font-bold text-2xl lg:text-3xl">
               Tout ce dont vous avez besoin
             </h2>
-            <p className="text-[#DAF866] text-xs lg:text-lg italic">
+            <p className="text-[#DAF866] text-sm lg:text-lg italic">
               Des fonctionnalités puissantes pour une gestion financière
               simplifiée
             </p>
           </div>
           <FeaturesSection features={features} />
-          <StatsSection stats={stats} />
         </div>
-        <div className="bg-[#e1ff6750] h-[1px] w-full mt-10"></div>
+
+        <div className="bg-[#e1ff6750] h-[1px] w-full"></div>
+
+        <TrustSection />
+
+        <div className="bg-[#e1ff6750] h-[1px] w-full"></div>
+
+        <FaqSection />
+
+        <div className="bg-[#e1ff6750] h-[1px] w-full"></div>
+
         <CtaSection />
+
+        <Footer />
       </div>
     </div>
   );
