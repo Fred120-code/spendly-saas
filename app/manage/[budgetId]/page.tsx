@@ -1,13 +1,28 @@
 "use client";
 
-import { deleteMyBudgetAction, getMyBudgetByIdAction } from "@/modules/budgets/budget.actions";
-import { addTransactionAction, deleteMyTransactionAction } from "@/modules/transactions/transaction.actions";
+import {
+  deleteMyBudgetAction,
+  getMyBudgetByIdAction,
+} from "@/modules/budgets/budget.actions";
+import {
+  addTransactionAction,
+  deleteMyTransactionAction,
+  updateMyTransactionAction,
+} from "@/modules/transactions/transaction.actions";
 import BudgetItem from "@/app/components/BudgetItem";
 import Wrapper from "@/app/components/Wrapper";
-import { Budgets } from "@/type";
+import { Budgets, Transactions } from "@/type";
 import React, { useEffect, useState } from "react";
 import Notification from "@/app/components/Notification";
-import { ArrowLeft, Send, Trash, Plus, AlertCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  Send,
+  Trash,
+  Plus,
+  AlertCircle,
+  Pencil,
+  X,
+} from "lucide-react";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
@@ -17,6 +32,11 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
   const [description, setDescription] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [notification, setNotification] = useState<string>("");
+  const [editingTransaction, setEditingTransaction] =
+    useState<Transactions | null>(null);
+  const [editDescription, setEditDescription] = useState<string>("");
+  const [editAmount, setEditAmount] = useState<string>("");
+  const [savingEdit, setSavingEdit] = useState<boolean>(false);
 
   const closeNotification = () => {
     setNotification("");
@@ -106,6 +126,47 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
         console.error("Erreur lors de la suppression de la transaction");
         setNotification("✗ Erreur lors de la suppression");
       }
+    }
+  };
+
+  const handleOpenEdit = (transaction: Transactions) => {
+    setEditingTransaction(transaction);
+    setEditDescription(transaction.description);
+    setEditAmount(String(transaction.amount));
+  };
+
+  const handleCancelEdit = () => {
+    setEditingTransaction(null);
+    setEditDescription("");
+    setEditAmount("");
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingTransaction) return;
+
+    const amountNumber = parseFloat(editAmount);
+
+    if (isNaN(amountNumber) || amountNumber <= 0) {
+      setNotification("✗ Veuillez entrer un montant positif");
+      setTimeout(() => setNotification(""), 3000);
+      return;
+    }
+
+    setSavingEdit(true);
+    try {
+      await updateMyTransactionAction(editingTransaction.id, {
+        amount: amountNumber,
+        description: editDescription,
+      });
+
+      setNotification("✓ Transaction modifiée avec succès");
+      fetchBudgetData(budgetId);
+      handleCancelEdit();
+    } catch (error) {
+      setNotification(`✗ ${error}`);
+    } finally {
+      setSavingEdit(false);
+      setTimeout(() => setNotification(""), 3000);
     }
   };
 
@@ -329,14 +390,22 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                             </span>
                           </td>
                           <td className="py-4 px-4 text-center">
-                            <button
-                              className="p-2 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-lg transition-all"
-                              onClick={() =>
-                                handleDeletTransaction(transaction.id)
-                              }
-                            >
-                              <Trash className="w-5 h-5" />
-                            </button>
+                            <div className="flex items-center justify-center gap-2">
+                              <button
+                                className="p-2 hover:bg-[#E0FF67]/20 text-[#E0FF67] hover:text-white rounded-lg transition-all"
+                                onClick={() => handleOpenEdit(transaction)}
+                              >
+                                <Pencil className="w-5 h-5" />
+                              </button>
+                              <button
+                                className="p-2 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-lg transition-all"
+                                onClick={() =>
+                                  handleDeletTransaction(transaction.id)
+                                }
+                              >
+                                <Trash className="w-5 h-5" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -372,9 +441,18 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                           <Trash className="w-5 h-5" />
                         </button>
                       </div>
-                      <p className="font-bold text-red-400 text-right">
-                        -{transaction.amount.toLocaleString("fr-FR")} FCFA
-                      </p>
+                      <div>
+                        <button
+                          className="flex items-center gap-1 text-xs text-[#E0FF67] hover:text-white transition-colors"
+                          onClick={() => handleOpenEdit(transaction)}
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                          Modifier
+                        </button>
+                        <p className="font-bold text-red-400 text-right">
+                          -{transaction.amount.toLocaleString("fr-FR")} FCFA
+                        </p>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -390,6 +468,71 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                 </p>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal de modification d'une transaction */}
+      {editingTransaction && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={handleCancelEdit}
+          />
+          <div className="relative bg-gradient-to-br from-[#1D283A] to-[#171f2c] border border-[#E0FF67]/30 rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl shadow-black/40">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-bold text-xl text-white">
+                Modifier la transaction
+              </h3>
+              <button
+                onClick={handleCancelEdit}
+                className="p-1 hover:bg-white/5 rounded-lg transition-colors"
+              >
+                <X className="w-6 h-6 text-gray-400 hover:text-white" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">
+                  Description
+                </label>
+                <input
+                  type="text"
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  className="w-full px-4 py-3 bg-white/5 border border-[#E0FF67]/30 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-[#E0FF67] transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">
+                  Montant (FCFA)
+                </label>
+                <input
+                  type="number"
+                  value={editAmount}
+                  onChange={(e) => setEditAmount(e.target.value)}
+                  className="w-full px-4 py-3 bg-white/5 border border-[#E0FF67]/30 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-[#E0FF67] transition-all"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={handleCancelEdit}
+                  className="flex-1 px-4 py-3 bg-white/5 border border-[#E0FF67]/30 text-white rounded-lg font-medium hover:border-[#E0FF67] transition-all"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleSaveEdit}
+                  disabled={savingEdit}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-[#E0FF67] to-[#c4e933] text-[#151425] rounded-lg font-bold hover:shadow-lg hover:shadow-[#E0FF67]/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {savingEdit ? "Enregistrement..." : "Enregistrer"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
