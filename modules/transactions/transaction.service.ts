@@ -1,8 +1,19 @@
-import { transactionRepository, type ITransactionRepository } from "./transaction.repository";
-import { TransactionValidator, type TransactionInput } from "./transaction.validator";
+import {
+  transactionRepository,
+  type ITransactionRepository,
+} from "./transaction.repository";
+import {
+  TransactionValidator,
+  type TransactionInput,
+  type TransactionUpdateInput,
+} from "./transaction.validator";
 import { budgetService } from "@/modules/budgets/budget.service";
 import { userService } from "@/modules/users/user.service";
-import { NotFoundError, ValidationError, ForbiddenError } from "@/lib/errors/app-error";
+import {
+  NotFoundError,
+  ValidationError,
+  ForbiddenError,
+} from "@/lib/errors/app-error";
 
 type PeriodKey = "last7" | "last30" | "last90" | "last365" | "all";
 
@@ -30,7 +41,9 @@ function periodToDateLimit(period: string): Date | null {
 }
 
 export class TransactionService {
-  constructor(private readonly repo: ITransactionRepository = transactionRepository) {}
+  constructor(
+    private readonly repo: ITransactionRepository = transactionRepository,
+  ) {}
 
   /**
    * Ajoute une transaction à un budget, en vérifiant via budgetService que
@@ -40,9 +53,15 @@ export class TransactionService {
   async addTransactionToOwnedBudget(userId: string, data: TransactionInput) {
     TransactionValidator.validateCreateInput(data);
 
-    const budget = await budgetService.getOwnedBudgetById(userId, data.budgetId);
+    const budget = await budgetService.getOwnedBudgetById(
+      userId,
+      data.budgetId,
+    );
 
-    const totalSpent = budget.transactions.reduce((sum, tx) => sum + tx.amount, 0);
+    const totalSpent = budget.transactions.reduce(
+      (sum, tx) => sum + tx.amount,
+      0,
+    );
     const totalWithTransaction = totalSpent + data.amount;
     if (totalWithTransaction > budget.amount) {
       throw new ValidationError(
@@ -58,7 +77,51 @@ export class TransactionService {
     });
   }
 
-  async deleteOwnedTransaction(userId: string, transactionId: string): Promise<void> {
+  /**
+   * Modifie une transaction existante, en revérifiant l'ownership et le
+   * budget disponible (en excluant l'ancien montant de cette transaction
+   * du calcul, puisqu'on est en train de le remplacer).
+   */
+  async updateOwnedTransaction(
+    userId: string,
+    transactionId: string,
+    data: TransactionUpdateInput,
+  ) {
+    TransactionValidator.validateUpdateInput(data);
+
+    const transaction = await this.repo.findById(transactionId);
+    if (!transaction) {
+      throw new NotFoundError("Transaction introuvable");
+    }
+    if (!transaction.budgetId) {
+      throw new ForbiddenError("Transaction orpheline, modification refusée");
+    }
+
+    //verifier que l'utilisateur possede bien le budget parent
+    const budget = await budgetService.getOwnedBudgetById(
+      userId,
+      transaction.budgetId,
+    );
+
+    //recalcule le total depensé en excluant l'ancien montant de cette transaction,
+    //puis ajoute le nouveau montant proposé
+    const totalSpentWithoutThisTx = budget.transactions
+      .filter((tx) => tx.id !== transactionId)
+      .reduce((sum, tx) => sum + tx.amount, 0);
+
+    if (totalSpentWithoutThisTx + data.amount > budget.amount) {
+      throw new ValidationError(
+        `Budget insuffisant. Montant disponible: ${budget.amount - totalSpentWithoutThisTx}FCFA`,
+      );
+    }
+
+    return this.repo.update(transactionId, data);
+  }
+
+  async deleteOwnedTransaction(
+    userId: string,
+    transactionId: string,
+  ): Promise<void> {
     const transaction = await this.repo.findById(transactionId);
     if (!transaction) {
       throw new NotFoundError("Transaction introuvable");
@@ -95,20 +158,26 @@ export class TransactionService {
         .map((tx) => ({ ...tx, budgetName: budget.name })),
     );
 
-    return transactions.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return transactions.sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+    );
   }
 
   async getTotalAmountForUser(userId: string): Promise<number> {
     const user = await userService.getUserWithBudgets(userId);
     return user.budgets.reduce(
-      (sum, budget) => sum + budget.transactions.reduce((s, tx) => s + tx.amount, 0),
+      (sum, budget) =>
+        sum + budget.transactions.reduce((s, tx) => s + tx.amount, 0),
       0,
     );
   }
 
   async getTotalCountForUser(userId: string): Promise<number> {
     const user = await userService.getUserWithBudgets(userId);
-    return user.budgets.reduce((count, budget) => count + budget.transactions.length, 0);
+    return user.budgets.reduce(
+      (count, budget) => count + budget.transactions.length,
+      0,
+    );
   }
 }
 

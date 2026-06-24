@@ -2,11 +2,26 @@
 
 import { requireCurrentUser } from "@/lib/auth/current-user";
 import { transactionService } from "./transaction.service";
-import type { TransactionInput } from "./transaction.validator";
+import type {
+  TransactionInput,
+  TransactionUpdateInput,
+} from "./transaction.validator";
 
 export async function addTransactionAction(input: TransactionInput) {
   const user = await requireCurrentUser();
   return transactionService.addTransactionToOwnedBudget(user.id, input);
+}
+
+export async function updateMyTransactionAction(
+  transactionId: string,
+  input: TransactionUpdateInput,
+) {
+  const user = await requireCurrentUser();
+  return transactionService.updateOwnedTransaction(
+    user.id,
+    transactionId,
+    input,
+  );
 }
 
 export async function deleteMyTransactionAction(transactionId: string) {
