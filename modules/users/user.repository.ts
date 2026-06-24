@@ -7,7 +7,13 @@ export interface UserWithBudgets extends AppUser {
     name: string;
     amount: number;
     emoji: string | null;
-    transactions: { id: string; amount: number; description: string; emoji: string | null; createdAt: Date }[];
+    transactions: {
+      id: string;
+      amount: number;
+      description: string;
+      emoji: string | null;
+      createdAt: Date;
+    }[];
   }[];
 }
 
