@@ -53,7 +53,7 @@ const page = () => {
   const filteredTransactions = transactions.filter((tx) => {
     const matchesSearch =
       tx.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tx.budgetName.toLowerCase().includes(searchTerm.toLowerCase());
+      tx.budgetName?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesBudget =
       selectedBudget === null || tx.budgetName === selectedBudget;
     return matchesSearch && matchesBudget;
