@@ -101,7 +101,7 @@ const page = () => {
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="p-6 rounded-2xl bg-gradient-to-br from-[#E0FF67]/10 to-[#c4e933]/5 border border-[#E0FF67]/30 hover:border-[#E0FF67]/60 transition-all duration-300">
+        <div className="p-6 rounded-2xl bg-gradient-to-br from-[#E0FF67]/10 to-[#c4e933]/5 border border-[#E0FF67]/30 hover:border-[#E0FF67]/60 transition-all duration-300 cursor-pointer">
           <div className="flex items-center justify-between mb-2">
             <p className="text-gray-400 text-sm font-medium">Total</p>
             <TrendingDown className="w-5 h-5 text-[#E0FF67]" />
@@ -112,7 +112,7 @@ const page = () => {
           <p className="text-xs text-gray-500 mt-1">FCFA</p>
         </div>
 
-        <div className="p-6 rounded-2xl bg-gradient-to-br from-[#E0FF67]/10 to-[#c4e933]/5 border border-[#E0FF67]/30 hover:border-[#E0FF67]/60 transition-all duration-300">
+        <div className="p-6 rounded-2xl bg-gradient-to-br from-[#E0FF67]/10 to-[#c4e933]/5 border border-[#E0FF67]/30 hover:border-[#E0FF67]/60 transition-all duration-300 cursor-pointer">
           <div className="flex items-center justify-between mb-2">
             <p className="text-gray-400 text-sm font-medium">Nombre</p>
             <Send className="w-5 h-5 text-[#E0FF67]" />
@@ -123,7 +123,7 @@ const page = () => {
           <p className="text-xs text-gray-500 mt-1">transactions</p>
         </div>
 
-        <div className="p-6 rounded-2xl bg-gradient-to-br from-[#E0FF67]/10 to-[#c4e933]/5 border border-[#E0FF67]/30 hover:border-[#E0FF67]/60 transition-all duration-300">
+        <div className="p-6 rounded-2xl bg-gradient-to-br from-[#E0FF67]/10 to-[#c4e933]/5 border border-[#E0FF67]/30 hover:border-[#E0FF67]/60 transition-all duration-300 cursor-pointer">
           <div className="flex items-center justify-between mb-2">
             <p className="text-gray-400 text-sm font-medium">Moyenne</p>
             <Filter className="w-5 h-5 text-[#E0FF67]" />
@@ -136,7 +136,7 @@ const page = () => {
           <p className="text-xs text-gray-500 mt-1">par transaction</p>
         </div>
 
-        <div className="p-6 rounded-2xl bg-gradient-to-br from-[#E0FF67]/10 to-[#c4e933]/5 border border-[#E0FF67]/30 hover:border-[#E0FF67]/60 transition-all duration-300">
+        <div className="p-6 rounded-2xl bg-gradient-to-br from-[#E0FF67]/10 to-[#c4e933]/5 border border-[#E0FF67]/30 hover:border-[#E0FF67]/60 transition-all duration-300 cursor-pointer">
           <div className="flex items-center justify-between mb-2">
             <p className="text-gray-400 text-sm font-medium">Plus élevée</p>
             <Calendar className="w-5 h-5 text-[#E0FF67]" />
@@ -156,7 +156,7 @@ const page = () => {
             <button
               key={period.id}
               onClick={() => setActivePeriod(period.id)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+              className={`px-4 py-2 rounded-lg cursor-pointer font-medium transition-all duration-300 ${
                 activePeriod === period.id
                   ? "bg-gradient-to-r from-[#E0FF67] to-[#c4e933] text-[#151425] shadow-lg"
                   : "bg-white/5 border border-[#E0FF67]/30 text-gray-300 hover:border-[#E0FF67]/60"
@@ -206,7 +206,7 @@ const page = () => {
       </div>
 
       {/* Transactions Table/List */}
-      <div className="p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 hover:border-[#E0FF67]/40 transition-all duration-300">
+      <div className="p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 hover:border-[#E0FF67]/40 transition-all duration-300 ">
         {loading ? (
           <div className="flex justify-center items-center py-20">
             <div className="flex flex-col items-center gap-4">
@@ -236,7 +236,7 @@ const page = () => {
 
             {/* Desktop Table */}
             <div className="hidden lg:block overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full cursor-pointer">
                 <thead>
                   <tr className="border-b border-[#E0FF67]/20">
                     <th className="text-left py-4 px-4 text-gray-400 font-semibold text-sm">
@@ -299,7 +299,7 @@ const page = () => {
                       setCurrentPage((prev) => Math.max(1, prev - 1))
                     }
                     disabled={currentPage === 1}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-[#E0FF67]/30 text-gray-300 hover:border-[#E0FF67]/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer bg-white/5 border border-[#E0FF67]/30 text-gray-300 hover:border-[#E0FF67]/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     Précédent
@@ -311,7 +311,7 @@ const page = () => {
                         <button
                           key={page}
                           onClick={() => setCurrentPage(page)}
-                          className={`w-8 h-8 rounded-lg font-medium transition-all duration-300 ${
+                          className={`w-8 h-8 rounded-lg font-medium cursor-pointer transition-all duration-300 ${
                             currentPage === page
                               ? "bg-gradient-to-r from-[#E0FF67] to-[#c4e933] text-[#151425] shadow-lg"
                               : "bg-white/5 border border-[#E0FF67]/30 text-gray-300 hover:border-[#E0FF67]/60"
@@ -328,14 +328,13 @@ const page = () => {
                       setCurrentPage((prev) => Math.min(totalPages, prev + 1))
                     }
                     disabled={currentPage === totalPages}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-[#E0FF67]/30 text-gray-300 hover:border-[#E0FF67]/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer bg-white/5 border border-[#E0FF67]/30 text-gray-300 hover:border-[#E0FF67]/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                   >
                     Suivant
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
               </div>
-
             </div>
 
             {/* Mobile Cards */}
@@ -395,7 +394,6 @@ const page = () => {
                 </div>
               </div>
             </div>
-
           </div>
         )}
       </div>

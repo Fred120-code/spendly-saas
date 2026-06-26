@@ -186,7 +186,7 @@ const page = () => {
           />
 
           {/* Modal Content */}
-          <div className="relative bg-gradient-to-br from-[#1D283A] to-[#171f2c] border border-[#E0FF67]/30 rounded-2xl backdrop-blur-md p-6 w-full max-w-md mx-4 shadow-2xl shadow-black/40">
+          <div className="relative bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 rounded-2xl backdrop-blur-md p-6 w-full max-w-md mx-4 shadow-2xl shadow-black/40">
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-bold text-xl text-white">
                 Créer un nouveau budget

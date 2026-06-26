@@ -37,7 +37,7 @@ const BudgetItem: React.FC<BudgetItemProps> = ({ budget, enableHover }) => {
   return (
     <li
       key={budget.id}
-      className={`rounded-2xl list-none border border-white/10 p-5 bg-gradient-to-br from-[#1D283A] to-[#171f2c] transition-all duration-300 ${hoverClasse}`}
+      className={`rounded-2xl list-none p-5 bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 transition-all duration-300 ${hoverClasse}`}
     >
       {/* En-tête du budget: emoji, nom et nombre de transactions */}
       <div className="flex items-center justify-between mb-6">
