@@ -479,7 +479,7 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
             className="fixed inset-0 bg-black/60 backdrop-blur-sm"
             onClick={handleCancelEdit}
           />
-          <div className="relative bg-gradient-to-br from-[#1D283A] to-[#171f2c] border border-[#E0FF67]/30 rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl shadow-black/40">
+          <div className="relative bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl shadow-black/40">
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-bold text-xl text-white">
                 Modifier la transaction

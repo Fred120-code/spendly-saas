@@ -184,11 +184,11 @@ const page = () => {
           {/* Charts Section */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Bar Chart */}
-            <div className="lg:col-span-2 p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 hover:border-[#E0FF67]/40 transition-all duration-300">
+            <div className="lg:col-span-2 p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 hover:border-[#E0FF67]/40 transition-all duration-300 cursor-pointer">
               <h3 className="text-xl font-bold text-white mb-6">
                 Suivi par Budget
               </h3>
-              <div className="w-full overflow-x-auto">
+              <div className="w-full overflow-x-auto cursor-pointer">
                 {budgetData && budgetData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart
@@ -227,7 +227,7 @@ const page = () => {
             </div>
 
             {/* Pie Chart + légende */}
-            <div className="p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 hover:border-[#E0FF67]/40 transition-all duration-300">
+            <div className="p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 hover:border-[#E0FF67]/40 transition-all duration-300 cursor-pointer">
               <h3 className="text-xl font-bold text-white mb-6">Répartition</h3>
               {pieData && pieData.length > 0 ? (
                 <>
@@ -300,7 +300,7 @@ const page = () => {
           </div>
 
           {/* Transactions + colonne IA */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 cursor-pointer">
             {/* Transactions List */}
             <div className="lg:col-span-2 p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 hover:border-[#E0FF67]/40 transition-all duration-300">
               {transactions.length === 0 ? (
@@ -409,7 +409,7 @@ function KpiCard({
 
   return (
     <div
-      className={`group p-6 lg:p-7 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border ${toneStyles.border} transition-all duration-300`}
+      className={`group p-6 lg:p-7 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border ${toneStyles.border} transition-all duration-300 cursor-pointer`}
     >
       <div className="flex items-center justify-between">
         <div className="space-y-2">
