@@ -1,0 +1,7 @@
+# Remplace par ton vrai nom de domaine (ex: spendly.mondomaine.com).
+# Caddy obtient et renouvelle automatiquement un certificat HTTPS valide
+# pour ce domaine — c'est tout ce qu'il y a à faire, aucune configuration
+# manuelle de certificat comme avec Nginx + Certbot.
+votre-domaine.com {
+	reverse_proxy app:3000
+}
