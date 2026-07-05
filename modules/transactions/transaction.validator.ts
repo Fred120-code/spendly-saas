@@ -1,44 +1,39 @@
-export interface TransactionInput {
-  budgetId: string;
-  amount: number;
-  description: string;
-}
+import { z } from "zod";
+import { parseOrThrow } from "@/lib/validation/parse";
 
-export interface TransactionUpdateInput {
-  amount: number;
-  description: string;
-}
+const descriptionSchema = z
+  .string()
+  .trim()
+  .min(1, "La description est obligatoire")
+  .max(255, "La description ne doit pas dépasser 255 caractères");
+
+const amountSchema = z
+  .number()
+  .positive("Le montant doit être supérieur à 0");
+
+export const transactionCreateSchema = z.object({
+  budgetId: z
+    .string()
+    .trim()
+    .min(1, "L'ID du budget est obligatoire"),
+  amount: amountSchema,
+  description: descriptionSchema,
+});
+
+export const transactionUpdateSchema = z.object({
+  amount: amountSchema,
+  description: descriptionSchema,
+});
+
+export type TransactionInput = z.infer<typeof transactionCreateSchema>;
+export type TransactionUpdateInput = z.infer<typeof transactionUpdateSchema>;
 
 export class TransactionValidator {
-  static validateCreateInput(data: Partial<TransactionInput>): void {
-    if (!data.budgetId || data.budgetId.trim().length === 0) {
-      throw new Error("L'ID du budget est obligatoire");
-    }
-
-    if (!data.amount || data.amount <= 0) {
-      throw new Error("Le montant doit être supérieur à 0");
-    }
-
-    if (!data.description || data.description.trim().length === 0) {
-      throw new Error("La description est obligatoire");
-    }
-
-    if (data.description.length > 255) {
-      throw new Error("La description ne doit pas dépasser 255 caractères");
-    }
+  static validateCreateInput(data: unknown): TransactionInput {
+    return parseOrThrow(transactionCreateSchema, data);
   }
 
-  static validateUpdateInput(data: Partial<TransactionUpdateInput>): void {
-    if (!data.amount || data.amount <= 0) {
-      throw new Error("Le montant doit être supérieur à 0");
-    }
-
-    if (!data.description || data.description?.trim().length === 0) {
-      throw new Error("La description est obligatoire");
-    }
-
-    if (data.description.length > 255) {
-      throw new Error("La description ne doit pas dépasser 255 caractères");
-    }
+  static validateUpdateInput(data: unknown): TransactionUpdateInput {
+    return parseOrThrow(transactionUpdateSchema, data);
   }
 }

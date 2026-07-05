@@ -42,6 +42,12 @@ export class ForbiddenError extends AppError {
   }
 }
 
+export class RateLimitError extends AppError {
+  constructor(message: string = "Trop de requêtes. Réessayez dans quelques instants.") {
+    super(message, "RATE_LIMIT", 429);
+  }
+}
+
 /**
  * Convertit n'importe quelle erreur en message "sûr" à renvoyer au client.
  * Les erreurs inattendues (bug, erreur Prisma, etc.) ne doivent JAMAIS

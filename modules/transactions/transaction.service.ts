@@ -14,6 +14,7 @@ import {
   ValidationError,
   ForbiddenError,
 } from "@/lib/errors/app-error";
+import { formatMoney } from "@/lib/money";
 
 type PeriodKey = "last7" | "last30" | "last90" | "last365" | "all";
 
@@ -51,29 +52,29 @@ export class TransactionService {
    * l'ancien addTansactionToBuget(budgetId, ...) qui ne vérifiait rien).
    */
   async addTransactionToOwnedBudget(userId: string, data: TransactionInput) {
-    TransactionValidator.validateCreateInput(data);
+    const validated = TransactionValidator.validateCreateInput(data);
 
     const budget = await budgetService.getOwnedBudgetById(
       userId,
-      data.budgetId,
+      validated.budgetId,
     );
 
     const totalSpent = budget.transactions.reduce(
       (sum, tx) => sum + tx.amount,
       0,
     );
-    const totalWithTransaction = totalSpent + data.amount;
+    const totalWithTransaction = totalSpent + validated.amount;
     if (totalWithTransaction > budget.amount) {
       throw new ValidationError(
-        `Budget insuffisant. Montant disponible: ${budget.amount - totalSpent}€`,
+        `Budget insuffisant. Montant disponible: ${formatMoney(budget.amount - totalSpent)}`,
       );
     }
 
     return this.repo.create({
-      amount: data.amount,
-      description: data.description,
+      amount: validated.amount,
+      description: validated.description,
       emoji: budget.emoji,
-      budgetId: data.budgetId,
+      budgetId: validated.budgetId,
     });
   }
 
@@ -87,7 +88,7 @@ export class TransactionService {
     transactionId: string,
     data: TransactionUpdateInput,
   ) {
-    TransactionValidator.validateUpdateInput(data);
+    const validated = TransactionValidator.validateUpdateInput(data);
 
     const transaction = await this.repo.findById(transactionId);
     if (!transaction) {
@@ -109,13 +110,13 @@ export class TransactionService {
       .filter((tx) => tx.id !== transactionId)
       .reduce((sum, tx) => sum + tx.amount, 0);
 
-    if (totalSpentWithoutThisTx + data.amount > budget.amount) {
+    if (totalSpentWithoutThisTx + validated.amount > budget.amount) {
       throw new ValidationError(
-        `Budget insuffisant. Montant disponible: ${budget.amount - totalSpentWithoutThisTx}FCFA`,
+        `Budget insuffisant. Montant disponible: ${formatMoney(budget.amount - totalSpentWithoutThisTx)}`,
       );
     }
 
-    return this.repo.update(transactionId, data);
+    return this.repo.update(transactionId, validated);
   }
 
   async deleteOwnedTransaction(

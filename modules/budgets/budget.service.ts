@@ -1,5 +1,6 @@
 import { budgetRepository, type IBudgetRepository, type BudgetWithTransactions } from "./budget.repository";
-import { BudgetValidator, type BudgetInput } from "./budget.validator";
+import { BudgetValidator } from "./budget.validator";
+import type { BudgetInput } from "./budget.validator";
 import { NotFoundError, ForbiddenError } from "@/lib/errors/app-error";
 
 function spentAmount(budget: BudgetWithTransactions): number {
@@ -10,8 +11,8 @@ export class BudgetService {
   constructor(private readonly repo: IBudgetRepository = budgetRepository) {}
 
   async createBudget(userId: string, data: BudgetInput) {
-    BudgetValidator.validateCreateInput(data);
-    return this.repo.create({ ...data, userId });
+    const validated = BudgetValidator.validateCreateInput(data);
+    return this.repo.create({ ...validated, userId });
   }
 
   async getBudgetsForUser(userId: string) {

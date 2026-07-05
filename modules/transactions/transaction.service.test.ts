@@ -92,7 +92,7 @@ describe("TransactionService", () => {
           amount: 500,
           description: "",
         }),
-      ).rejects.toThrow("La description est obligatoire");
+      ).rejects.toThrow(ValidationError);
 
       expect(budgetService.getOwnedBudgetById).not.toHaveBeenCalled();
     });
