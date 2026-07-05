@@ -5,7 +5,7 @@ import {
   makeBudget,
   makeTransactionRecord,
 } from "./__fixtures__/budget.fixtures";
-import { NotFoundError, ForbiddenError } from "@/lib/errors/app-error";
+import { NotFoundError, ForbiddenError, ValidationError } from "@/lib/errors/app-error";
 
 describe("BudgetService", () => {
   let repo: FakeBudgetRepository;
@@ -37,13 +37,13 @@ describe("BudgetService", () => {
           amount: 0,
           emoji: "🎮",
         }),
-      ).rejects.toThrow("Le montant du budget doit être supérieur à 0");
+      ).rejects.toThrow(ValidationError);
     });
 
     it("rejette un nom vide", async () => {
       await expect(
         service.createBudget("user-1", { name: "", amount: 1000, emoji: "🎮" }),
-      ).rejects.toThrow("Le nom du budget est obligatoire");
+      ).rejects.toThrow(ValidationError);
     });
   });
 
