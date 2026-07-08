@@ -2,16 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Wrapper from "../components/Wrapper";
 import { useUser } from "@clerk/nextjs";
-import {
-  getMyEndBudgetCountAction,
-  getMyBudgetDistributionAction,
-  getMyPieChartDataAction,
-} from "@/modules/budgets/budget.actions";
-import {
-  getMyTotalTransactionAmountAction,
-  getMyTotalTransactionCountAction,
-  getMyLastTransactionsAction,
-} from "@/modules/transactions/transaction.actions";
+import { getDashboardDataAction } from "@/modules/dashboard/dashboard.actions";
 import {
   AlertTriangle,
   ArrowRightLeft,
@@ -62,22 +53,14 @@ const page = () => {
     try {
       if (!user) return;
 
-      const [amount, count, endBuget, budgetdata, piedata, lastransactions] =
-        await Promise.all([
-          getMyTotalTransactionAmountAction(),
-          getMyTotalTransactionCountAction(),
-          getMyEndBudgetCountAction(),
-          getMyBudgetDistributionAction(),
-          getMyPieChartDataAction(),
-          getMyLastTransactionsAction(5),
-        ]);
+      const dashboardData = await getDashboardDataAction();
 
-      setTotalAmount(amount ?? null);
-      setTotalCount(count ?? null);
-      setTotalEndBuget(endBuget ?? null);
-      setBudgetData(budgetdata ?? []);
-      setPieData(piedata ?? []);
-      setTransactions(lastransactions ?? []);
+      setTotalAmount(dashboardData.amount ?? null);
+      setTotalCount(dashboardData.count ?? null);
+      setTotalEndBuget(dashboardData.endBuget ?? null);
+      setBudgetData(dashboardData.budgetdata ?? []);
+      setPieData(dashboardData.piedata ?? []);
+      setTransactions(dashboardData.lastransactions ?? []);
 
       setLoading(false);
     } catch (error) {
