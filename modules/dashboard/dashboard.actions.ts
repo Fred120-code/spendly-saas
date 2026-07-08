@@ -12,7 +12,7 @@ import {
   getMyPieChartDataAction,
 } from "@/modules/budgets/budget.actions";
 
-export async function getDashboardData() {
+export async function getDashboardDataAction() {
   const [amount, count, endBuget, budgetdata, piedata, lastransactions] =
     await Promise.all([
       getMyTotalTransactionAmountAction(),

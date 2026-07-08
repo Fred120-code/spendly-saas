@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Wrapper from "../components/Wrapper";
 import { useUser } from "@clerk/nextjs";
-import { getDashboardData } from "@/modules/dashboard/dashboard.actions";
+import { getDashboardDataAction } from "@/modules/dashboard/dashboard.actions";
 import {
   AlertTriangle,
   ArrowRightLeft,
@@ -53,7 +53,7 @@ const page = () => {
     try {
       if (!user) return;
 
-      const dashboardData = await getDashboardData();
+      const dashboardData = await getDashboardDataAction();
 
       setTotalAmount(dashboardData.amount ?? null);
       setTotalCount(dashboardData.count ?? null);
