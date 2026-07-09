@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { Transactions } from "@/type";
 import { getMyTransactionsByPeriodAction } from "@/modules/transactions/transaction.actions";
 
-interface TransactionSate {
+interface TransactionState {
   transactions: Transactions[];
   period: string;
   loading: boolean;
@@ -10,24 +10,24 @@ interface TransactionSate {
   error: string | null;
 }
 
-const initialState: TransactionSate = {
+const initialState: TransactionState = {
   transactions: [],
-  period: "",
+  period: "all",
   loading: false,
   loaded: false,
   error: null,
 };
 
-const fetchTransactionData = createAsyncThunk(
+export const fetchTransactionData = createAsyncThunk(
   "transaction/fetchData",
-  async (_, { getState }) => {
-    const state = getState() as { transactions: TransactionSate };
+  async (period: string = "all", { getState }) => {
+    const state = getState() as { transactions: TransactionState };
 
-    if (state.transactions.loaded) {
+    if (state.transactions.loaded && state.transactions.period === period) {
       return null;
     }
 
-    return await getMyTransactionsByPeriodAction(state.transactions.period);
+    return await getMyTransactionsByPeriodAction(period);
   },
 );
 
@@ -54,9 +54,9 @@ const transactionSlice = createSlice({
 
         const data = action.payload;
         state.transactions = data ?? [];
-        state.period = "";
+        state.period = action.meta.arg ?? "all";
         state.loading = false;
-        state.loaded = false;
+        state.loaded = true;
       })
       .addCase(fetchTransactionData.rejected, (state, action) => {
         state.loading = false;

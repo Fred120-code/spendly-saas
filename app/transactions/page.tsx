@@ -1,9 +1,8 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import Wrapper from "../components/Wrapper";
 import { useUser } from "@clerk/nextjs";
-import { Transactions } from "@/type";
-import { getMyTransactionsByPeriodAction } from "@/modules/transactions/transaction.actions";
 import {
   Send,
   TrendingDown,
@@ -13,11 +12,17 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { fetchTransactionData } from "@/store/transactionSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
 const page = () => {
   const user = useUser();
-  const [transactions, setTransactions] = useState<Transactions[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const dispatch = useAppDispatch();
+
+  const { transactions, loading } = useAppSelector(
+    (state) => state.transactions,
+  );
+
   const [activePeriod, setActivePeriod] = useState("last30");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBudget, setSelectedBudget] = useState<string | null>(null);
@@ -31,23 +36,9 @@ const page = () => {
     { id: "all", label: "Tous" },
   ];
 
-  const fetchTransaction = async (period: string) => {
-    if (user?.user) {
-      setLoading(true);
-      try {
-        const transactionData = await getMyTransactionsByPeriodAction(period);
-        setTransactions(transactionData);
-        setLoading(false);
-      } catch (error) {
-        console.error("Erreur lors de la recuperation des transactions", error);
-        setLoading(false);
-      }
-    }
-  };
-
   useEffect(() => {
-    fetchTransaction(activePeriod);
-  }, [activePeriod, user?.user?.primaryEmailAddress?.emailAddress]);
+    dispatch(fetchTransactionData(activePeriod));
+  }, [activePeriod, user?.user?.primaryEmailAddress?.emailAddress, dispatch]);
 
   // Filtrer les transactions
   const filteredTransactions = transactions.filter((tx) => {
