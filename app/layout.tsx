@@ -1,14 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+// @ts-ignore: allow importing global CSS without type declarations
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
-import {
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
+import StoreProvider from "@/store/StoreProvider";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -47,7 +43,7 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          {children}
+          <StoreProvider>{children}</StoreProvider>
         </body>
       </html>
     </ClerkProvider>
