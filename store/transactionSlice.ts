@@ -18,7 +18,6 @@ const initialState: TransactionSate = {
   error: null,
 };
 
-
 const fetchTransactionData = createAsyncThunk(
   "transaction/fetchData",
   async (_, { getState }) => {
@@ -32,7 +31,6 @@ const fetchTransactionData = createAsyncThunk(
   },
 );
 
-
 const transactionSlice = createSlice({
   name: "transactions",
   initialState,
@@ -44,10 +42,28 @@ const transactionSlice = createSlice({
 
   extraReducers: (builder) => {
     builder
-        .addCase(fetchTransactionData.pending, (state) => {
-            if(!state.loaded){
-                state.loading = true
-            }
-        })
-  }
+      .addCase(fetchTransactionData.pending, (state) => {
+        if (!state.loaded) {
+          state.loading = true;
+        }
+
+        state.error = null;
+      })
+      .addCase(fetchTransactionData.fulfilled, (state, action) => {
+        if (action.payload === null) return;
+
+        const data = action.payload;
+        state.transactions = data ?? [];
+        state.period = "";
+        state.loading = false;
+        state.loaded = false;
+      })
+      .addCase(fetchTransactionData.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message ?? "Erreur inconnue";
+      });
+  },
 });
+
+export const { invalidateTransaction } = transactionSlice.actions;
+export default transactionSlice.reducer;

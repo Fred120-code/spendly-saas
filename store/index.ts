@@ -1,12 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
 import dashboardReducer from "./dashboardSlice";
+import transactionsReducer from "./transactionSlice";
 
 export const store = configureStore({
   reducer: {
     dashboard: dashboardReducer,
-    // tu ajouteras ici d'autres slices plus tard :
     // budgets: budgetsReducer,
-    // transactions: transactionsReducer,
+    transactions: transactionsReducer,
   },
 });
 
