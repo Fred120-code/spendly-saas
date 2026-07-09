@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Wrapper from "../components/Wrapper";
 import { useUser } from "@clerk/nextjs";
 import { getDashboardDataAction } from "@/modules/dashboard/dashboard.actions";
@@ -22,9 +22,10 @@ import {
   Pie,
   PieChart,
 } from "recharts";
-import { Transactions } from "@/type";
 import ChatIA from "../components/ChatIA";
 import RapportAI from "../components/RapportAI";
+import { fetchDashboardData } from "@/store/dashboardSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
 interface BudgetDistribution {
   budgetName: string;
@@ -39,38 +40,26 @@ interface PieDatum {
 
 const page = () => {
   const { user } = useUser();
+  const dispatch = useAppDispatch();
 
-  const [totalAmount, setTotalAmount] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [totalCount, setTotalCount] = useState<number | null>(null);
-  const [totalEndBuget, setTotalEndBuget] = useState<string | null>(null);
-  const [budgetData, setBudgetData] = useState<BudgetDistribution[]>([]);
-  const [pieData, setPieData] = useState<PieDatum[]>([]);
-  const [transactions, setTransactions] = useState<Transactions[]>([]);
+  // On lit directement depuis le store Redux, plus de useState
+  const {
+    totalAmount,
+    totalCount,
+    totalEndBuget,
+    budgetData,
+    pieData,
+    transactions,
+    loading,
+  } = useAppSelector((state) => state.dashboard);
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      if (!user) return;
-
-      const dashboardData = await getDashboardDataAction();
-
-      setTotalAmount(dashboardData.amount ?? null);
-      setTotalCount(dashboardData.count ?? null);
-      setTotalEndBuget(dashboardData.endBuget ?? null);
-      setBudgetData(dashboardData.budgetdata ?? []);
-      setPieData(dashboardData.piedata ?? []);
-      setTransactions(dashboardData.lastransactions ?? []);
-
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
-    fetchData();
-  }, [user]);
+    
+    if(user) {
+      dispatch(fetchDashboardData())
+    }
+  }, [user, dispatch]);
 
   // --- Statistiques dérivées, calculées à partir des données déjà chargées ---
   const totalRemaining = budgetData.reduce(
@@ -356,7 +345,7 @@ const page = () => {
       )}
     </Wrapper>
   );
-};
+};;
 
 /** Carte KPI réutilisable, accent variable selon `tone`. */
 function KpiCard({
