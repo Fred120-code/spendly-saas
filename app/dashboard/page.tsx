@@ -2,7 +2,6 @@
 import React, { useEffect } from "react";
 import Wrapper from "../components/Wrapper";
 import { useUser } from "@clerk/nextjs";
-import { getDashboardDataAction } from "@/modules/dashboard/dashboard.actions";
 import {
   AlertTriangle,
   ArrowRightLeft,
@@ -27,16 +26,6 @@ import RapportAI from "../components/RapportAI";
 import { fetchDashboardData } from "@/store/dashboardSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
-interface BudgetDistribution {
-  budgetName: string;
-  totalBudgetAmount: number;
-  totalTransactionAmount: number;
-}
-
-interface PieDatum {
-  name: string;
-  value: number;
-}
 
 const page = () => {
   const { user } = useUser();
