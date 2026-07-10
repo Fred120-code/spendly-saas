@@ -5,9 +5,7 @@ import Wrapper from "../components/Wrapper";
 import { useUser } from "@clerk/nextjs";
 import EmojiPicker from "emoji-picker-react";
 import {
-  createBudgetAction,
-  getMyBudgetsAction,
-} from "@/modules/budgets/budget.actions";
+  createBudgetAction} from "@/modules/budgets/budget.actions";
 import Notification from "../components/Notification";
 import {
   Plus,
@@ -17,30 +15,44 @@ import {
   Banknote,
   PiggyBank,
 } from "lucide-react";
-import { Budgets } from "@/type";
 import Link from "next/link";
 import BudgetItem from "../components/BudgetItem";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchBudgets, invalidateBudgetList } from "@/store/budgetsSlice";
+import { invalidateDashboard } from "@/store/dashboardSlice";
 
 const page = () => {
   const user = useUser();
+  const dispatch = useAppDispatch();
 
-  const [loading, setLoading] = useState(true);
+  // Lecture depuis le store Redux au lieu de useState
+  const { list: budgets, listLoading: loading } = useAppSelector(
+    (state) => state.budgets,
+  );
+
   const [budgetName, setBudgetName] = useState<string>("");
   const [budgetAmount, setBudgetAmount] = useState<string>("");
   const [showEmoji, setShowEmoji] = useState<boolean>(false);
   const [selectedEmoji, setSelectedEmoji] = useState<string>("");
   const [notification, setNotification] = useState<string>("");
-  const [budgets, setBudgets] = useState<Budgets[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const closeNotification = () => {
     setNotification("");
   };
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   const handleEmjiSelect = (emojiObject: { emoji: string }) => {
     setSelectedEmoji(emojiObject.emoji);
     setShowEmoji(false);
   };
+
+
+  useEffect(() => {
+    dispatch(fetchBudgets())
+  }, [user.user, dispatch]);
+
 
   const handleAddBuget = async () => {
     try {
@@ -61,9 +73,14 @@ const page = () => {
         emoji: selectedEmoji,
       });
 
-      fetchBudgets();
-      setIsModalOpen(false);
+      // Invalide la liste ET le dashboard car les stats ont changé
+      dispatch(invalidateBudgetList());
+      dispatch(invalidateDashboard());
 
+      // Recharge la liste fraîche dans le store
+      dispatch(fetchBudgets());
+
+      closeModal()
       setNotification("✓ Nouveau budget créé avec succès");
       setBudgetName("");
       setBudgetAmount("");
@@ -77,27 +94,6 @@ const page = () => {
     }
   };
 
-  const fetchBudgets = async () => {
-    setLoading(true);
-    if (user.user) {
-      try {
-        const userBudget = await getMyBudgetsAction();
-        setBudgets(userBudget);
-        setLoading(false);
-      } catch (error) {
-        setNotification("✗ Erreur lors de la récupération des budgets");
-        setLoading(false);
-      }
-    }
-  };
-
-  useEffect(() => {
-    fetchBudgets();
-  }, [user.user?.primaryEmailAddress?.emailAddress]);
-
-  const openModal = () => setIsModalOpen(true);
-
-  const closeModal = () => setIsModalOpen(false);
 
   // --- Stats globales dérivées de la liste de budgets déjà chargée ---
   const totalAllocated = budgets.reduce((sum, b) => sum + b.amount, 0);
@@ -331,6 +327,6 @@ const page = () => {
       </div>
     </Wrapper>
   );
-};
+};;
 
 export default page;
