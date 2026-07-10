@@ -25,10 +25,19 @@ import {
 } from "lucide-react";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import {
+  fetchBudgetById,
+  invalidateBudgetList,
+  invalidateSelectedBudget,
+  invalidateAll,
+} from "@/store/budgetsSlice";
+import { invalidateDashboard } from "@/store/dashboardSlice";
 
 const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
+  const dispatch = useAppDispatch();
+
   const [budgetId, setBudgetID] = useState<string>("");
-  const [budget, setBudget] = useState<Budgets>();
   const [description, setDescription] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [notification, setNotification] = useState<string>("");
@@ -39,31 +48,30 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
   const [editAmount, setEditAmount] = useState<string>("");
   const [savingEdit, setSavingEdit] = useState<boolean>(false);
 
+  // Lecture depuis le store
+  const { selectedBudget: budget, selectedLoading: loading } = useAppSelector(
+    (state) => state.budgets,
+  );
+
   const closeNotification = () => {
     setNotification("");
   };
 
-  async function fetchBudgetData(budgetId: string) {
-    try {
-      if (budgetId) {
-        const budgetData = await getMyBudgetByIdAction(budgetId);
-        if (budgetData) {
-          setBudget(budgetData);
-        }
-      }
-    } catch (error) {
-      console.error("erreur lors de la recuperation", error);
-    }
-  }
-
   useEffect(() => {
     const getId = async () => {
       const resolvedParams = await params;
-      setBudgetID(resolvedParams.budgetId);
-      fetchBudgetData(resolvedParams.budgetId);
+      const id = resolvedParams.budgetId;
+      setBudgetID(id);
+      dispatch(fetchBudgetById(id));
     };
     getId();
   }, []);
+
+  const refreshBudget = () => {
+    // Invalide le budget sélectionné et recharge depuis MongoDB
+    dispatch(invalidateSelectedBudget());
+    dispatch(fetchBudgetById(budgetId));
+  };
 
   const handleAddTransaction = async () => {
     if (!amount || !description) {
@@ -86,8 +94,13 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
         description,
       });
 
+      // La transaction change les totaux,invalide budget sélectionné + dashboard
+      dispatch(invalidateSelectedBudget());
+      dispatch(invalidateBudgetList());
+      dispatch(invalidateDashboard());
+      dispatch(fetchBudgetById(budgetId));
+
       setNotification("✓ Transaction ajoutée avec succès");
-      fetchBudgetData(budgetId);
       setAmount("");
       setDescription("");
       setIsOpenCreate(false);
@@ -105,6 +118,11 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
     if (confirmed) {
       try {
         await deleteMyBudgetAction(budgetId);
+
+        // Le budget disparaît,invalide tout
+        dispatch(invalidateAll());
+        dispatch(invalidateDashboard());
+
         setNotification("✓ Budget supprimé");
         setTimeout(() => redirect("/budgets"), 1500);
       } catch (error) {
@@ -121,7 +139,12 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
     if (confirmed) {
       try {
         await deleteMyTransactionAction(transactionId);
-        fetchBudgetData(budgetId);
+
+        dispatch(invalidateSelectedBudget());
+        dispatch(invalidateBudgetList());
+        dispatch(invalidateDashboard());
+        dispatch(fetchBudgetById(budgetId));
+
         setNotification("✓ Transaction supprimée");
         setTimeout(() => setNotification(""), 3000);
       } catch (error) {
@@ -135,10 +158,6 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
     setEditingTransaction(transaction);
     setEditDescription(transaction.description);
     setEditAmount(String(transaction.amount));
-  };
-
-  const handleCancelCreate = () => {
-    setIsOpenCreate(false);
   };
 
   const handleCancelEdit = () => {
@@ -165,8 +184,12 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
         description: editDescription,
       });
 
+      dispatch(invalidateSelectedBudget());
+      dispatch(invalidateBudgetList());
+      dispatch(invalidateDashboard());
+      dispatch(fetchBudgetById(budgetId));
+
       setNotification("✓ Transaction modifiée avec succès");
-      fetchBudgetData(budgetId);
       handleCancelEdit();
     } catch (error) {
       setNotification(`✗ ${error}`);
