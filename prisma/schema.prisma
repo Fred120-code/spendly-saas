@@ -27,6 +27,8 @@ model Budget{
   emoji          String?
   transactions   Transaction[]
   createdAt      DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Transaction{
@@ -37,6 +39,9 @@ model Transaction{
   budget         Budget? @relation(fields: [budgetId], references: [id])
   emoji          String?
   createdAt      DateTime @default(now())
+
+  @@index([budgetId])
+  @@index([createdAt(sort: Desc)])
 }
 
 model AiReport {

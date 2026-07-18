@@ -15,6 +15,7 @@ import {
   ForbiddenError,
 } from "@/lib/errors/app-error";
 import { formatMoney } from "@/lib/money";
+import { prisma } from "@/lib/prisma";
 
 type PeriodKey = "last7" | "last30" | "last90" | "last365" | "all";
 
@@ -136,49 +137,59 @@ export class TransactionService {
   }
 
   async getLastTransactionsForUser(userId: string, limit: number = 5) {
-    const user = await userService.getUserWithBudgets(userId);
-    const all = user.budgets.flatMap((budget) =>
-      budget.transactions.map((tx) => ({
-        ...tx,
-        budgetName: budget.name,
-        budget: budget.name,
-      })),
-    );
-    return all
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-      .slice(0, limit);
+    return prisma.transaction.findMany({
+      where: {
+        budget: {
+          userId,
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: limit,
+      include: {
+        budget: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
   }
 
   async getTransactionsByPeriod(userId: string, period: PeriodKey | string) {
     const dateLimit = periodToDateLimit(period);
-    const user = await userService.getUserWithBudgets(userId);
-
-    const transactions = user.budgets.flatMap((budget) =>
-      budget.transactions
-        .filter((tx) => !dateLimit || tx.createdAt >= dateLimit)
-        .map((tx) => ({ ...tx, budgetName: budget.name })),
-    );
-
-    return transactions.sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
-    );
+    return prisma.transaction.findMany({
+      where: {
+        budget: { userId },
+        ...(dateLimit ? { createdAt: { gte: dateLimit } } : {}),
+      },
+      orderBy: { createdAt: "desc" },
+      include: { budget: { select: { name: true } } },
+    });
   }
 
   async getTotalAmountForUser(userId: string): Promise<number> {
-    const user = await userService.getUserWithBudgets(userId);
-    return user.budgets.reduce(
-      (sum, budget) =>
-        sum + budget.transactions.reduce((s, tx) => s + tx.amount, 0),
-      0,
-    );
+    const result = await prisma.transaction.aggregate({
+      where: {
+        budget: {
+          userId,
+        },
+      },
+      _sum: { amount: true },
+    });
+
+    return result._sum.amount ?? 0;
   }
 
   async getTotalCountForUser(userId: string): Promise<number> {
-    const user = await userService.getUserWithBudgets(userId);
-    return user.budgets.reduce(
-      (count, budget) => count + budget.transactions.length,
-      0,
-    );
+    return prisma.transaction.count({
+      where: {
+        budget: {
+          userId,
+        },
+      },
+    });
   }
 }
 
