@@ -1,4 +1,9 @@
-import { budgetRepository, type IBudgetRepository, type BudgetWithTransactions } from "./budget.repository";
+import { prisma } from "@/lib/prisma";
+import {
+  budgetRepository,
+  type IBudgetRepository,
+  type BudgetWithTransactions,
+} from "./budget.repository";
 import { BudgetValidator } from "./budget.validator";
 import type { BudgetInput } from "./budget.validator";
 import { NotFoundError, ForbiddenError } from "@/lib/errors/app-error";
@@ -25,7 +30,10 @@ export class BudgetService {
    * cette méthode pour accéder à un budget précis : c'est elle qui
    * empêche un utilisateur d'accéder aux données d'un autre (IDOR).
    */
-  async getOwnedBudgetById(userId: string, budgetId: string): Promise<BudgetWithTransactions> {
+  async getOwnedBudgetById(
+    userId: string,
+    budgetId: string,
+  ): Promise<BudgetWithTransactions> {
     const budget = await this.repo.findById(budgetId);
     if (!budget) {
       throw new NotFoundError("Budget introuvable");
@@ -43,11 +51,23 @@ export class BudgetService {
 
   /** Données pour le BarChart du dashboard. */
   async getDistributionData(userId: string) {
-    const budgets = await this.repo.findManyByUserId(userId);
-    return budgets.map((budget) => ({
-      budgetName: budget.name,
-      totalBudgetAmount: budget.amount,
-      totalTransactionAmount: spentAmount(budget),
+    const budgets = await prisma.budget.findMany({
+      where: { userId },
+      select: {
+        name: true,
+        amount: true,
+        transactions: {
+          select: {
+            amount: true,
+          },
+        },
+      },
+    });
+
+    return budgets.map((b) => ({
+      budgetName: b.name,
+      totalBudgetAmount: b.amount,
+      totalTransactionAmount: b.transactions.reduce((s, t) => s + t.amount, 0),
     }));
   }
 
@@ -61,8 +81,24 @@ export class BudgetService {
 
   /** Nombre de budgets "atteints" (dépenses >= montant alloué), ex: "2 / 5". */
   async getEndBudgetCount(userId: string): Promise<string> {
-    const budgets = await this.repo.findManyByUserId(userId);
-    const ended = budgets.filter((b) => spentAmount(b) >= b.amount).length;
+    const budgets = await prisma.budget.findMany({
+      where: {
+        userId,
+      },
+      select: {
+        amount: true,
+        transactions: {
+          select: {
+            amount: true,
+          },
+        },
+      },
+    });
+
+    const ended = budgets.filter(
+      (b) => b.transactions.reduce((s, t) => s + t.amount, 0) == b.amount,
+    ).length;
+
     return `${ended} / ${budgets.length}`;
   }
 }

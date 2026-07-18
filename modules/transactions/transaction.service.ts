@@ -8,7 +8,6 @@ import {
   type TransactionUpdateInput,
 } from "./transaction.validator";
 import { budgetService } from "@/modules/budgets/budget.service";
-import { userService } from "@/modules/users/user.service";
 import {
   NotFoundError,
   ValidationError,
