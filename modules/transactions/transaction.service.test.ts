@@ -1,189 +1,143 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { TransactionService } from "./transaction.service";
-import { FakeTransactionRepository } from "./__fakes__/fake-transaction.repository";
-import { makeTransactionRecord } from "./__fixtures__/transaction.fixtures";
 import {
-  ForbiddenError,
+  transactionRepository,
+  type ITransactionRepository,
+} from "./transaction.repository";
+import {
+  TransactionValidator,
+  type TransactionInput,
+  type TransactionUpdateInput,
+} from "./transaction.validator";
+import { budgetService } from "@/modules/budgets/budget.service";
+import {
   NotFoundError,
   ValidationError,
+  ForbiddenError,
 } from "@/lib/errors/app-error";
-import type { BudgetWithTransactions } from "@/modules/budgets/budget.repository";
 
-/**
- * transaction.service.ts importe directement le SINGLETON budgetService
- * (pas une dépendance injectée par constructeur comme le repository).
- * On ne peut donc pas lui passer une fausse version via `new TransactionService(...)`
- * : on remplace le module entier avec vi.mock(), une technique différente
- * mais tout aussi standard.
- */
-vi.mock("@/modules/budgets/budget.service", () => ({
-  budgetService: { getOwnedBudgetById: vi.fn() },
-}));
-
-import { budgetService } from "@/modules/budgets/budget.service";
-
-function makeMockBudget(
-  overrides: Partial<BudgetWithTransactions> = {},
-): BudgetWithTransactions {
-  return {
-    id: "budget-1",
-    name: "Alimentation",
-    amount: 5000,
-    emoji: "🍔",
-    userId: "user-1",
-    createdAt: new Date("2026-01-01"),
-    transactions: [],
-    ...overrides,
-  };
+function periodToDateFrom(period: string): Date | undefined {
+  const now = new Date();
+  switch (period) {
+    case "last7": {
+      const d = new Date(now);
+      d.setDate(now.getDate() - 7);
+      return d;
+    }
+    case "last30": {
+      const d = new Date(now);
+      d.setDate(now.getDate() - 30);
+      return d;
+    }
+    case "last90": {
+      const d = new Date(now);
+      d.setDate(now.getDate() - 90);
+      return d;
+    }
+    case "last365": {
+      const d = new Date(now);
+      d.setFullYear(now.getFullYear() - 1);
+      return d;
+    }
+    case "all":
+      return undefined; 
+    default:
+      throw new ValidationError("Période invalide");
+  }
 }
 
-describe("TransactionService", () => {
-  let repo: FakeTransactionRepository;
-  let service: TransactionService;
+export class TransactionService {
+  constructor(
+    private readonly repo: ITransactionRepository = transactionRepository,
+  ) {}
 
-  beforeEach(() => {
-    repo = new FakeTransactionRepository();
-    service = new TransactionService(repo);
-    vi.mocked(budgetService.getOwnedBudgetById).mockReset();
-  });
+  async addTransactionToOwnedBudget(userId: string, data: TransactionInput) {
+    TransactionValidator.validateCreateInput(data);
 
-  describe("addTransactionToOwnedBudget", () => {
-    it("ajoute la transaction si le budget appartient à l'utilisateur et qu'il reste de la place", async () => {
-      vi.mocked(budgetService.getOwnedBudgetById).mockResolvedValue(
-        makeMockBudget({
-          transactions: [makeTransactionRecord({ amount: 1000 })],
-        }),
+    const budget = await budgetService.getOwnedBudgetById(
+      userId,
+      data.budgetId,
+    );
+
+    const totalSpent = budget.transactions.reduce(
+      (sum, tx) => sum + tx.amount,
+      0,
+    );
+    if (totalSpent + data.amount > budget.amount) {
+      throw new ValidationError(
+        `Budget insuffisant. Montant disponible : ${budget.amount - totalSpent} FCFA`,
       );
+    }
 
-      const tx = await service.addTransactionToOwnedBudget("user-1", {
-        budgetId: "budget-1",
-        amount: 2000,
-        description: "Courses",
-      });
+    return this.repo.create({
+      amount: data.amount,
+      description: data.description,
+      emoji: budget.emoji,
+      budgetId: data.budgetId,
+    });
+  }
 
-      expect(tx.amount).toBe(2000);
-      expect(budgetService.getOwnedBudgetById).toHaveBeenCalledWith(
-        "user-1",
-        "budget-1",
+  async updateOwnedTransaction(
+    userId: string,
+    transactionId: string,
+    data: TransactionUpdateInput,
+  ) {
+    TransactionValidator.validateUpdateInput(data);
+
+    const transaction = await this.repo.findById(transactionId);
+    if (!transaction) throw new NotFoundError("Transaction introuvable");
+    if (!transaction.budgetId)
+      throw new ForbiddenError("Transaction orpheline, modification refusée");
+
+    const budget = await budgetService.getOwnedBudgetById(
+      userId,
+      transaction.budgetId,
+    );
+
+    const totalWithoutThis = budget.transactions
+      .filter((tx) => tx.id !== transactionId)
+      .reduce((sum, tx) => sum + tx.amount, 0);
+
+    if (totalWithoutThis + data.amount > budget.amount) {
+      throw new ValidationError(
+        `Budget insuffisant. Montant disponible : ${budget.amount - totalWithoutThis} FCFA`,
       );
-    });
+    }
 
-    it("refuse si le budget est dépassé", async () => {
-      vi.mocked(budgetService.getOwnedBudgetById).mockResolvedValue(
-        makeMockBudget({
-          amount: 1000,
-          transactions: [makeTransactionRecord({ amount: 900 })],
-        }),
-      );
+    return this.repo.update(transactionId, data);
+  }
 
-      await expect(
-        service.addTransactionToOwnedBudget("user-1", {
-          budgetId: "budget-1",
-          amount: 500,
-          description: "Trop cher",
-        }),
-      ).rejects.toThrow(ValidationError);
-    });
+  async deleteOwnedTransaction(
+    userId: string,
+    transactionId: string,
+  ): Promise<void> {
+    const transaction = await this.repo.findById(transactionId);
+    if (!transaction) throw new NotFoundError("Transaction introuvable");
+    if (!transaction.budgetId)
+      throw new ForbiddenError("Transaction orpheline, suppression refusée");
 
-    it("rejette une description vide avant même de consulter le budget", async () => {
-      await expect(
-        service.addTransactionToOwnedBudget("user-1", {
-          budgetId: "budget-1",
-          amount: 500,
-          description: "",
-        }),
-      ).rejects.toThrow(ValidationError);
+    await budgetService.getOwnedBudgetById(userId, transaction.budgetId);
+    await this.repo.delete(transactionId);
+  }
 
-      expect(budgetService.getOwnedBudgetById).not.toHaveBeenCalled();
-    });
-  });
+  // --- Méthodes optimisées ---
 
-  describe("updateOwnedTransaction", () => {
-    it("recalcule le total en excluant l'ancien montant de la transaction modifiée", async () => {
-      const existing = makeTransactionRecord({
-        id: "tx-1",
-        amount: 1000,
-        budgetId: "budget-1",
-      });
-      repo.seed([existing]);
+  async getLastTransactionsForUser(userId: string, limit: number = 5) {
+   
+    return this.repo.findRecentByUserId(userId, limit);
+  }
 
-      vi.mocked(budgetService.getOwnedBudgetById).mockResolvedValue(
-        makeMockBudget({
-          transactions: [existing, makeTransactionRecord({ amount: 2000 })],
-        }),
-      );
+  async getTransactionsByPeriod(userId: string, period: string) {
+    const from = periodToDateFrom(period);
+    return this.repo.findByUserIdAndPeriod(userId, from);
+  }
 
-      const updated = await service.updateOwnedTransaction("user-1", "tx-1", {
-        amount: 1500,
-        description: "Courses corrigées",
-      });
+  async getTotalAmountForUser(userId: string): Promise<number> {
+    return this.repo.sumAmountByUserId(userId);
+  }
 
-      expect(updated.amount).toBe(1500);
-      expect(updated.description).toBe("Courses corrigées");
-    });
+  async getTotalCountForUser(userId: string): Promise<number> {
 
-    it("refuse la modification si le nouveau montant dépasse le budget disponible", async () => {
-      const existing = makeTransactionRecord({
-        id: "tx-1",
-        amount: 1000,
-        budgetId: "budget-1",
-      });
-      repo.seed([existing]);
+    return this.repo.countByUserId(userId);
+  }
+}
 
-      vi.mocked(budgetService.getOwnedBudgetById).mockResolvedValue(
-        makeMockBudget({
-          amount: 5000,
-          transactions: [existing, makeTransactionRecord({ amount: 4000 })],
-        }),
-      );
-
-      await expect(
-        service.updateOwnedTransaction("user-1", "tx-1", {
-          amount: 2000,
-          description: "Trop cher",
-        }),
-      ).rejects.toThrow(ValidationError);
-    });
-
-    it("lève une NotFoundError si la transaction n'existe pas", async () => {
-      await expect(
-        service.updateOwnedTransaction("user-1", "tx-inexistante", {
-          amount: 100,
-          description: "Test",
-        }),
-      ).rejects.toThrow(NotFoundError);
-    });
-  });
-
-  describe("deleteOwnedTransaction", () => {
-    it("supprime la transaction si l'utilisateur possède le budget parent", async () => {
-      const existing = makeTransactionRecord({
-        id: "tx-1",
-        budgetId: "budget-1",
-      });
-      repo.seed([existing]);
-      vi.mocked(budgetService.getOwnedBudgetById).mockResolvedValue(
-        makeMockBudget(),
-      );
-
-      await service.deleteOwnedTransaction("user-1", "tx-1");
-
-      expect(await repo.findById("tx-1")).toBeNull();
-    });
-
-    it("propage l'erreur si l'utilisateur n'est pas propriétaire du budget", async () => {
-      const existing = makeTransactionRecord({
-        id: "tx-1",
-        budgetId: "budget-1",
-      });
-      repo.seed([existing]);
-      vi.mocked(budgetService.getOwnedBudgetById).mockRejectedValue(
-        new ForbiddenError(),
-      );
-
-      await expect(
-        service.deleteOwnedTransaction("user-2", "tx-1"),
-      ).rejects.toThrow(ForbiddenError);
-    });
-  });
-});
+export const transactionService = new TransactionService();

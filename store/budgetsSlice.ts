@@ -60,26 +60,14 @@ const budgetsSlice = createSlice({
   name: "budgets",
   initialState,
   reducers: {
-    /**
-     * Invalide la liste (ex: après création ou suppression d'un budget).
-     * Le prochain fetchBudgets refetchera depuis MongoDB.
-     */
     invalidateBudgetList(state) {
       state.listLoaded = false;
     },
 
-    /**
-     * Invalide le budget sélectionné (ex: après ajout/modif/suppression
-     * d'une transaction). Le prochain fetchBudgetById refetchera.
-     */
     invalidateSelectedBudget(state) {
       state.selectedLoadedId = null;
     },
 
-    /**
-     * Raccourci : invalide TOUT (liste + budget sélectionné).
-     * Utilisé quand on supprime un budget (ça affecte les deux pages).
-     */
     invalidateAll(state) {
       state.listLoaded = false;
       state.selectedLoadedId = null;
