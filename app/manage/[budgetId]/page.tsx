@@ -2,7 +2,6 @@
 
 import {
   deleteMyBudgetAction,
-  getMyBudgetByIdAction,
 } from "@/modules/budgets/budget.actions";
 import {
   addTransactionAction,
@@ -67,11 +66,6 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
     getId();
   }, []);
 
-  const refreshBudget = () => {
-    // Invalide le budget sélectionné et recharge depuis MongoDB
-    dispatch(invalidateSelectedBudget());
-    dispatch(fetchBudgetById(budgetId));
-  };
 
   const handleAddTransaction = async () => {
     if (!amount || !description) {
