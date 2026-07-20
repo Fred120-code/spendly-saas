@@ -53,7 +53,19 @@ const transactionSlice = createSlice({
         if (action.payload === null) return;
 
         const data = action.payload;
-        state.transactions = data ?? [];
+        const tx = [
+          {
+             id: data[id],
+    amount: data[amount],
+    emoji: data[emoji] | null,
+    description: data[description],
+    createdAt: data[createdAt],
+    budgetName?: data[budget.name] | undefined,
+    budget?: string | null | undefined;
+          }
+        ]
+
+        state.transactions = tx ?? [];
         state.period = action.meta.arg ?? "all";
         state.loading = false;
         state.loaded = true;
