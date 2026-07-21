@@ -239,9 +239,7 @@ const page = () => {
                     <th className="text-left py-4 px-4 text-gray-400 font-semibold text-sm">
                       Description
                     </th>
-                    <th className="text-left py-4 px-4 text-gray-400 font-semibold text-sm">
-                      Catégorie
-                    </th>
+                   
                     <th className="text-right py-4 px-4 text-gray-400 font-semibold text-sm">
                       Montant
                     </th>
@@ -266,9 +264,7 @@ const page = () => {
                       <td className="py-4 px-4 text-gray-400 text-sm">
                         {tx.description}
                       </td>
-                      <td className="py-4 px-4 text-2xl text-center">
-                        {tx.emoji}
-                      </td>
+                      
                       <td className="py-4 px-4 text-right text-[#E0FF67] font-bold text-sm">
                         {tx.amount.toLocaleString("fr-FR")} FCFA
                       </td>
