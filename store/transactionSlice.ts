@@ -52,20 +52,40 @@ const transactionSlice = createSlice({
       .addCase(fetchTransactionData.fulfilled, (state, action) => {
         if (action.payload === null) return;
 
-        const data = action.payload;
-        const tx = [
-          {
-             id: data[id],
-    amount: data[amount],
-    emoji: data[emoji] | null,
-    description: data[description],
-    createdAt: data[createdAt],
-    budgetName?: data[budget.name] | undefined,
-    budget?: string | null | undefined;
-          }
-        ]
+        const data = Array.isArray(action.payload) ? action.payload : [];
 
-        state.transactions = tx ?? [];
+        state.transactions = data.map((tx) => {
+          const rawTx = tx as Record<string, unknown>;
+          const budgetName =
+            typeof rawTx.budgetName === "string"
+              ? rawTx.budgetName
+              : typeof rawTx.budget === "object" &&
+                  rawTx.budget !== null &&
+                  "name" in rawTx.budget
+                ? String((rawTx.budget as Record<string, unknown>).name)
+                : "—";
+
+          return {
+            id: String(rawTx.id ?? ""),
+            amount: typeof rawTx.amount === "number" ? rawTx.amount : 0,
+            emoji:
+              rawTx.emoji === null || typeof rawTx.emoji === "string"
+                ? (rawTx.emoji as string | null)
+                : null,
+            description: String(rawTx.description ?? ""),
+            createdAt:
+              rawTx.createdAt instanceof Date
+                ? rawTx.createdAt
+                : new Date(String(rawTx.createdAt ?? Date.now())),
+            budgetId:
+              typeof rawTx.budgetId === "string"
+                ? rawTx.budgetId
+                : rawTx.budgetId === null
+                  ? null
+                  : String(rawTx.budgetId ?? ""),
+            budgetName,
+          } as Transactions;
+        });
         state.period = action.meta.arg ?? "all";
         state.loading = false;
         state.loaded = true;
