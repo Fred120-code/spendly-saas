@@ -2,6 +2,8 @@ import type {
   IBudgetRepository,
   BudgetWithTransactions,
   CreateBudgetData,
+  BudgetAmountWithTransactionAmounts,
+  BudgetDistributionRow,
 } from "../budget.repository";
 
 /**
@@ -42,5 +44,29 @@ export class FakeBudgetRepository implements IBudgetRepository {
 
   async deleteWithTransactions(id: string): Promise<void> {
     this.budgets = this.budgets.filter((b) => b.id !== id);
+  }
+
+  async findDistributionByUserId(
+    userId: string,
+  ): Promise<BudgetDistributionRow[]> {
+    return this.budgets
+      .filter((budget) => budget.userId === userId)
+      .map((budget) => ({
+        name: budget.name,
+        amount: budget.amount,
+        transactions: budget.transactions.map((tx) => ({ amount: tx.amount })),
+      }));
+  }
+
+  async findAmountsOnlyByUserId(
+    userId: string,
+  ): Promise<BudgetAmountWithTransactionAmounts[]> {
+    return this.budgets
+      .filter((budget) => budget.userId === userId)
+      .map((budget) => ({
+        name: budget.name,
+        amount: budget.amount,
+        transactions: budget.transactions.map((tx) => ({ amount: tx.amount })),
+      }));
   }
 }

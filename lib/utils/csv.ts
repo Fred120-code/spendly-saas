@@ -1,11 +1,4 @@
-/**
- * Convertit un tableau d'objets en chaîne CSV téléchargeable.
- * Pas de dépendance externe — le navigateur sait faire ça nativement.
- *
- * Exemple d'utilisation :
- *   const csv = generateCSV(transactions, ["date", "description", "montant"]);
- *   downloadCSV(csv, "transactions-janvier.csv");
- */
+
 
 export type CSVRow = Record<string, unknown>;
 
@@ -33,8 +26,8 @@ function formatCell(value: unknown): string {
 /**
  * Génère une chaîne CSV à partir d'un tableau de lignes.
  * @param rows     Les données à exporter
- * @param columns  Les clés à inclure dans l'export (dans l'ordre)
- * @param headers  Les titres de colonnes (si différents des clés)
+ * @param columns  Les clés à inclure dans l'export
+ * @param headers  Les titres de colonnes 
  */
 export function generateCSV<T extends object>(
   rows: T[],

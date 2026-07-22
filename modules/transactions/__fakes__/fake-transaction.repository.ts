@@ -3,6 +3,7 @@ import type {
   TransactionRecord,
   CreateTransactionData,
   UpdateTransactionData,
+  TransactionWithBudgetName,
 } from "../transaction.repository";
 
 export class FakeTransactionRepository implements ITransactionRepository {
@@ -46,5 +47,40 @@ export class FakeTransactionRepository implements ITransactionRepository {
 
   async delete(id: string): Promise<void> {
     this.transactions = this.transactions.filter((t) => t.id !== id);
+  }
+
+  async sumAmountByUserId(_userId: string): Promise<number> {
+    return this.transactions.reduce((sum, tx) => sum + tx.amount, 0);
+  }
+
+  async countByUserId(_userId: string): Promise<number> {
+    return this.transactions.length;
+  }
+
+  async findRecentByUserId(
+    _userId: string,
+    limit: number,
+  ): Promise<TransactionWithBudgetName[]> {
+    return this.transactions
+      .slice()
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, limit)
+      .map((tx) => ({
+        ...tx,
+        budgetName: "—",
+      }));
+  }
+
+  async findByUserIdAndPeriod(
+    _userId: string,
+    from?: Date,
+  ): Promise<TransactionWithBudgetName[]> {
+    return this.transactions
+      .filter((tx) => (from ? tx.createdAt >= from : true))
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .map((tx) => ({
+        ...tx,
+        budgetName: "—",
+      }));
   }
 }

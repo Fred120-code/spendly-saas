@@ -144,6 +144,8 @@ const page = () => {
 
           {/* Charts Section */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+
             {/* Bar Chart */}
             <div className="lg:col-span-2 p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 hover:border-[#E0FF67]/40 transition-all duration-300 cursor-pointer">
               <h3 className="text-xl font-bold text-white mb-6">
@@ -187,13 +189,16 @@ const page = () => {
               </div>
             </div>
 
+
             {/* Pie Chart + légende */}
             <div className="p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 hover:border-[#E0FF67]/40 transition-all duration-300 cursor-pointer">
               <h3 className="text-xl font-bold text-white mb-6">Répartition</h3>
               {pieData && pieData.length > 0 ? (
                 <>
                   <ResponsiveContainer width="100%" height={220}>
+                    
                     <PieChart>
+
                       <Pie
                         data={pieData}
                         dataKey="value"
@@ -218,6 +223,7 @@ const page = () => {
                           />
                         ))}
                       </Pie>
+
                       <Tooltip
                         contentStyle={{
                           backgroundColor: "#151425",
@@ -226,6 +232,7 @@ const page = () => {
                         }}
                       />
                     </PieChart>
+
                   </ResponsiveContainer>
                   <div className="flex flex-wrap gap-3 mt-4 justify-center">
                     {pieData.map((entry, index) => (
