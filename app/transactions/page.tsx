@@ -116,7 +116,9 @@ const page = () => {
           <button
             onClick={handleExportCSV}
             disabled={transactions.length === 0 || exporting}
-            className="flex items-center gap-2 px-5 py-3 bg-white/5 border border-[#E0FF67]/30 text-[#E0FF67] rounded-xl font-semibold hover:bg-[#E0FF67]/10 hover:border-[#E0FF67] transition-all disabled:opacity-40 disabled:cursor-not-allowed self-start md:self-auto"
+            className="flex items-center gap-2 px-5 py-3 bg-white/5 border border-[#E0FF67]/30 
+            text-[#E0FF67] rounded-xl font-semibold hover:bg-[#E0FF67]/10  text-sm
+            transition-all disabled:opacity-40 disabled:cursor-not-allowed self-start md:self-auto cursor-pointer"
           >
             <Download className="w-4 h-4" />
             {exporting ? "Export..." : "Exporter CSV"}

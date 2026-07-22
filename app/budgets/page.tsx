@@ -125,7 +125,9 @@ const page = () => {
           </div>
           <button
             onClick={openModal}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#E0FF67] to-[#c4e933] text-[#151425] rounded-xl font-bold hover:shadow-lg hover:shadow-[#E0FF67]/50 transition-all group shrink-0 self-start md:self-auto"
+            className="flex items-center gap-2 px-2 py-3 text-sm bg-[#d1f542] text-[#151425] 
+            rounded-xl font-bold hover:shadow-lg hover:shadow-[#E0FF67]/50 transition-all 
+            group shrink-0 self-start md:self-auto cursor-pointer"
           >
             <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" />
             Ajouter un budget
