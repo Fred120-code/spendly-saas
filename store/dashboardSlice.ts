@@ -8,7 +8,7 @@ interface BudgetDistribution {
   totalTransactionAmount: number;
 }
 
-interface PieDatum {
+interface PieDatum extends Record<string, string | number> {
   name: string;
   value: number;
 }
@@ -21,7 +21,7 @@ interface DashboardState {
   pieData: PieDatum[];
   transactions: Transactions[];
   loading: boolean;
-  loaded: boolean; // ← la clé : "est-ce qu'on a déjà chargé une fois ?"
+  loaded: boolean; 
   error: string | null;
 }
 
@@ -74,7 +74,6 @@ const dashboardSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchDashboardData.fulfilled, (state, action) => {
-        // Si la thunk a retourné null, c'est qu'on a sauté l'appel (déjà chargé)
         if (action.payload === null) return;
 
         const data = action.payload;
@@ -83,9 +82,34 @@ const dashboardSlice = createSlice({
         state.totalEndBuget = data.endBuget ?? null;
         state.budgetData = data.budgetdata ?? [];
         state.pieData = data.piedata ?? [];
-        state.transactions = data.lastransactions ?? [];
+
+        state.transactions = (data.lastransactions ?? []).map((tx) => {
+          const rawTx = tx as Record<string, unknown>;
+
+          return {
+            id: String(rawTx.id ?? ""),
+            amount: typeof rawTx.amount === "number" ? rawTx.amount : 0,
+            emoji:
+              rawTx.emoji === null || typeof rawTx.emoji === "string"
+                ? (rawTx.emoji as string | null)
+                : null,
+            description: String(rawTx.description ?? ""),
+            createdAt:
+              rawTx.createdAt instanceof Date
+                ? rawTx.createdAt
+                : new Date(String(rawTx.createdAt ?? Date.now())),
+            budgetName:
+              typeof rawTx.budgetName === "string"
+                ? rawTx.budgetName
+                : typeof rawTx.budget === "object" &&
+                    rawTx.budget !== null &&
+                    "name" in rawTx.budget
+                  ? String((rawTx.budget as Record<string, unknown>).name)
+                  : "—",
+          } as Transactions;
+        });
         state.loading = false;
-        state.loaded = true; // maintenant les visites suivantes sont gratuites
+        state.loaded = true;
       })
       .addCase(fetchDashboardData.rejected, (state, action) => {
         state.loading = false;

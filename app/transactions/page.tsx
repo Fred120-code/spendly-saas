@@ -11,9 +11,11 @@ import {
   Filter,
   ChevronLeft,
   ChevronRight,
+  Download,
 } from "lucide-react";
 import { fetchTransactionData } from "@/store/transactionSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { generateCSV, downloadCSV, buildCSVFilename } from "@/lib/utils/csv";
 
 const page = () => {
   const user = useUser();
@@ -27,6 +29,8 @@ const page = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBudget, setSelectedBudget] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [exporting, setExporting] = useState(false);
+
   const itemsPerPage = 10;
 
   const periods = [
@@ -78,16 +82,46 @@ const page = () => {
   );
   const budgets = Array.from(new Set(transactions.map((tx) => tx.budgetName)));
 
+  const handleExportCSV = () => {
+    if (transactions.length === 0) return;
+    setExporting(true);
+
+    try {
+      const csv = generateCSV(
+        transactions,
+        ["createdAt", "budgetName", "description", "amount"],
+        ["Date", "Budget", "Description", "Montant (FCFA)"],
+      );
+      downloadCSV(csv, buildCSVFilename("transactions"));
+    } finally {
+      setExporting(false);
+    }
+  };
   return (
     <Wrapper>
       {/* Page Header */}
       <div className="mb-8 pt-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-          Transactions
-        </h1>
-        <p className="text-gray-400 text-base md:text-lg">
-          Historique complet de vos transactions
-        </p>
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+              Transactions
+            </h1>
+            <p className="text-gray-400 text-base md:text-lg">
+              Historique de toutes vos dépenses
+            </p>
+          </div>
+
+          {/* Bouton export */}
+          <button
+            onClick={handleExportCSV}
+            disabled={transactions.length === 0 || exporting}
+            className="flex items-center gap-2 px-5 py-3 bg-white/5 border border-[#E0FF67]/30 text-[#E0FF67] rounded-xl font-semibold hover:bg-[#E0FF67]/10 hover:border-[#E0FF67] transition-all disabled:opacity-40 disabled:cursor-not-allowed self-start md:self-auto"
+          >
+            <Download className="w-4 h-4" />
+            {exporting ? "Export..." : "Exporter CSV"}
+          </button>
+        </div>
       </div>
 
       {/* Statistics Cards */}
@@ -202,7 +236,7 @@ const page = () => {
           <div className="flex justify-center items-center py-20">
             <div className="flex flex-col items-center gap-4">
               <span className="loading loading-dots loading-xl text-[#E0FF67]"></span>
-              <p className="text-gray-400">Chargement des transactions...</p>
+              <p className="text-gray-400">Chargement des ransactions...</p>
             </div>
           </div>
         ) : filteredTransactions.length === 0 ? (
@@ -239,7 +273,7 @@ const page = () => {
                     <th className="text-left py-4 px-4 text-gray-400 font-semibold text-sm">
                       Description
                     </th>
-                   
+
                     <th className="text-right py-4 px-4 text-gray-400 font-semibold text-sm">
                       Montant
                     </th>
@@ -264,7 +298,7 @@ const page = () => {
                       <td className="py-4 px-4 text-gray-400 text-sm">
                         {tx.description}
                       </td>
-                      
+
                       <td className="py-4 px-4 text-right text-[#E0FF67] font-bold text-sm">
                         {tx.amount.toLocaleString("fr-FR")} FCFA
                       </td>
