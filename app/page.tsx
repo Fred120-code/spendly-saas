@@ -63,7 +63,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="bg-[#151425] overflow-hidden">
+    <div className="bg-[#151425] overflow-hidden font-montserrat">
       <AosInit />
       <div className="flex items-center flex-col w-full bg-blend-overlay">
         <Header />

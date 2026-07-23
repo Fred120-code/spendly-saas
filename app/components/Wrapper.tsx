@@ -7,7 +7,7 @@ type WrapperProps = {
 
 const Wrapper = ({children}:WrapperProps) => {
   return (
-    <div className=" w-full px-5 space-x-4 lg:px-10 max-w-7xl mx-auto ">
+    <div className=" w-full px-5 space-x-4 lg:px-10 max-w-7xl mx-auto font-montserrat ">
       <div className="w-full">
         <Navbar />
       </div>
