@@ -19,8 +19,6 @@ const BudgetItem: React.FC<BudgetItemProps> = ({ budget, enableHover }) => {
   const ratio = budget.amount > 0 ? totaltransactionAmount / budget.amount : 0;
   const progressvalue = Math.min(ratio * 100, 100);
 
-  // Couleur de la barre / accent selon le niveau de dépense :
-  // vert sous 70%, accent lime entre 70 et 100%, rouge au-delà.
   const status = ratio >= 1 ? "danger" : ratio >= 0.7 ? "warning" : "safe";
 
   const statusStyles = {
@@ -37,7 +35,8 @@ const BudgetItem: React.FC<BudgetItemProps> = ({ budget, enableHover }) => {
   return (
     <li
       key={budget.id}
-      className={`rounded-2xl list-none p-5 bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 transition-all duration-300 ${hoverClasse}`}
+      className={`rounded-2xl list-none p-5 bg-gradient-to-br from-white/5
+         to-white/2 border border-[#E0FF67]/20 transition-all duration-300 ${hoverClasse}`}
     >
       {/* En-tête du budget: emoji, nom et nombre de transactions */}
       <div className="flex items-center justify-between mb-6">

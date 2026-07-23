@@ -8,15 +8,13 @@ import {
   deleteMyTransactionAction,
   updateMyTransactionAction,
 } from "@/modules/transactions/transaction.actions";
-import BudgetItem from "@/app/components/BudgetItem";
 import Wrapper from "@/app/components/Wrapper";
-import { Budgets, Transactions } from "@/type";
+import { Transactions } from "@/type";
 import React, { useEffect, useState } from "react";
 import Notification from "@/app/components/Notification";
 import {
   Send,
   Trash,
-  Plus,
   AlertCircle,
   Pencil,
   X,
@@ -339,7 +337,7 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
 
           {/* Add Transaction Form */}
           {isOpenCreate && (
-            
+
             <div className="fixed inset-0 z-50 flex items-center justify-center">
               <div
                 className="fixed inset-0 bg-black/60 backdrop-blur-sm"
@@ -474,6 +472,8 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                     </tbody>
                   </table>
                 </div>
+
+
 
                 {/* Mobile Cards */}
                 <div className="lg:hidden space-y-3">
