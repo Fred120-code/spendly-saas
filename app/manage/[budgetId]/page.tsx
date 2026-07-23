@@ -14,13 +14,13 @@ import { Budgets, Transactions } from "@/type";
 import React, { useEffect, useState } from "react";
 import Notification from "@/app/components/Notification";
 import {
-  ArrowLeft,
   Send,
   Trash,
   Plus,
   AlertCircle,
   Pencil,
   X,
+  ChevronLeftCircle
 } from "lucide-react";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -210,9 +210,10 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
         <div>
           <Link
             href="/budgets"
-            className="inline-flex items-center gap-2 text-[#E0FF67] hover:text-white transition-colors mb-4"
+            className="inline-flex items-center gap-2 text-[#E0FF67] hover:text-white 
+            transition-colors mb-4"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ChevronLeftCircle className="w-5 h-5" />
             Retour aux budgets
           </Link>
           <h1 className="text-3xl md:text-4xl font-bold text-white">
@@ -224,7 +225,9 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
       {budget && (
         <div className="space-y-8">
           {/* Budget Overview Card */}
-          <div className="p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20">
+          <div className="p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2
+           border border-[#E0FF67]/20">
+
             <div className="flex flex-col md:flex-row gap-8 items-start md:items-center justify-between">
               {/* Budget Info */}
               <div className="flex items-center gap-6 flex-1">
@@ -242,19 +245,22 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                 </div>
               </div>
 
+              {/* Add transaction button */}
+              <button
+                onClick={() => setIsOpenCreate(true)}
+                className="px-4 py-2 bg-green-500/20 border border-green-500/50 text-green-400 
+                rounded-lg hover:bg-green-500/30 transition-all text-sm font-medium cursor-pointer"
+              >
+                Ajouter une transacton
+              </button>
+
               {/* Delete Button */}
               <button
                 onClick={handleDeletBudget}
-                className="px-4 py-2 bg-red-500/20 border border-red-500/50 text-red-400 rounded-lg hover:bg-red-500/30 transition-all text-sm font-medium cursor-pointer"
+                className="px-4 py-2 bg-red-500/20 border border-red-500/50 text-red-400 rounded-lg
+                 hover:bg-red-500/30 transition-all text-sm font-medium cursor-pointer"
               >
-                Supprimer le budget
-              </button>
-
-              <button
-                onClick={() => setIsOpenCreate(true)}
-                className="px-4 py-2 bg-green-500/20 border border-green-500/50 text-green-400 rounded-lg hover:bg-green-500/30 transition-all text-sm font-medium cursor-pointer"
-              >
-                Ajouter une transacton
+                <Trash className="w-5 h-5 text-red-400" />
               </button>
             </div>
 
@@ -266,6 +272,7 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                   {percentageUsed.toFixed(1)}%
                 </p>
               </div>
+
               <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden border border-[#E0FF67]/20">
                 <div
                   className={`h-full transition-all ${
@@ -278,10 +285,12 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                   style={{ width: `${Math.min(percentageUsed, 100)}%` }}
                 ></div>
               </div>
+
             </div>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-[#E0FF67]/10">
+
               <div>
                 <p className="text-gray-400 text-xs mb-1">Dépensé</p>
                 <p className="text-xl font-bold text-white">
@@ -289,6 +298,7 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                 </p>
                 <p className="text-xs text-gray-600">FCFA</p>
               </div>
+
               <div>
                 <p className="text-gray-400 text-xs mb-1">Restant</p>
                 <p
@@ -298,6 +308,7 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                 </p>
                 <p className="text-xs text-gray-600">FCFA</p>
               </div>
+
               <div>
                 <p className="text-gray-400 text-xs mb-1">Transactions</p>
                 <p className="text-xl font-bold text-white">
@@ -305,12 +316,16 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                 </p>
                 <p className="text-xs text-gray-600">total</p>
               </div>
+
             </div>
+
           </div>
 
           {/* Warning if Budget Exceeded */}
           {remaining < 0 && (
+
             <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-3">
+
               <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
               <p className="text-red-400 text-sm">
                 Budget dépassé de{" "}
@@ -318,11 +333,13 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                   {Math.abs(remaining).toLocaleString("fr-FR")} FCFA
                 </span>
               </p>
+
             </div>
           )}
 
           {/* Add Transaction Form */}
           {isOpenCreate && (
+            
             <div className="fixed inset-0 z-50 flex items-center justify-center">
               <div
                 className="fixed inset-0 bg-black/60 backdrop-blur-sm"
