@@ -144,8 +144,6 @@ const page = () => {
 
           {/* Charts Section */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-
             {/* Bar Chart */}
             <div className="lg:col-span-2 p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 hover:border-[#E0FF67]/40 transition-all duration-300 cursor-pointer">
               <h3 className="text-xl font-bold text-white mb-6">
@@ -189,16 +187,13 @@ const page = () => {
               </div>
             </div>
 
-
             {/* Pie Chart + légende */}
             <div className="p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 hover:border-[#E0FF67]/40 transition-all duration-300 cursor-pointer">
               <h3 className="text-xl font-bold text-white mb-6">Répartition</h3>
               {pieData && pieData.length > 0 ? (
                 <>
                   <ResponsiveContainer width="100%" height={220}>
-                    
                     <PieChart>
-
                       <Pie
                         data={pieData}
                         dataKey="value"
@@ -215,8 +210,8 @@ const page = () => {
                               [
                                 "#E0FF67",
                                 "#c4e933",
-                                "#a8d600",
-                                "#3EF583",
+                                "#1F17C4",
+                                "#F9B93E",
                                 "#FF4C4C",
                               ][index % 5]
                             }
@@ -229,10 +224,10 @@ const page = () => {
                           backgroundColor: "#151425",
                           border: "1px solid #E0FF67",
                           borderRadius: "8px",
+                          color: "#fffff",
                         }}
                       />
                     </PieChart>
-
                   </ResponsiveContainer>
                   <div className="flex flex-wrap gap-3 mt-4 justify-center">
                     {pieData.map((entry, index) => (
@@ -246,8 +241,8 @@ const page = () => {
                             backgroundColor: [
                               "#E0FF67",
                               "#c4e933",
-                              "#a8d600",
-                              "#3EF583",
+                              "#1F17C4",
+                              "#F9B93E",
                               "#FF4C4C",
                             ][index % 5],
                           }}
