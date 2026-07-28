@@ -217,7 +217,7 @@ const page = () => {
             </div>
 
             {/* AreaChart — évolution des dépenses sur 30 jours */}
-            <DailyExpensesChart/>
+            <DailyExpensesChart />
 
             {/* Sur mobile : version simplifiée à la place du double BarChart */}
             <div className="lg:hidden p-6 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20">
@@ -420,12 +420,31 @@ function DailyExpensesChart() {
   const [data, setData] = useState<{ date: string; montant: number }[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const { dailyExpenses, loaded } = useAppSelector((state) => state.dashboard);
+
   useEffect(() => {
+    if (activeDays === 30) {
+      if (dailyExpenses.length > 0) {
+        setData(dailyExpenses);
+        setLoading(false);
+        return;
+      }
+
+      if (!loaded) {
+        setLoading(true);
+        return;
+      }
+
+      setData([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     getMyDailyExpenseAction(activeDays)
-      .then(setData)
+      .then((result) => setData(result ?? []))
       .finally(() => setLoading(false));
-  }, [activeDays]);
+  }, [activeDays, dailyExpenses, loaded]);
 
   // Calcul du total sur la période affichée
   const total = data.reduce((sum, d) => sum + d.montant, 0);
