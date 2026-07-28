@@ -4,6 +4,7 @@ import {
   getMyLastTransactionsAction,
   getMyTotalTransactionAmountAction,
   getMyTotalTransactionCountAction,
+  getMyDailyExpenseAction,
 } from "@/modules/transactions/transaction.actions";
 
 import {
@@ -13,7 +14,7 @@ import {
 } from "@/modules/budgets/budget.actions";
 
 export async function getDashboardDataAction() {
-  const [amount, count, endBuget, budgetdata, piedata, lastransactions] =
+  const [amount, count, endBuget, budgetdata, piedata, lastransactions, dailyExpenses] =
     await Promise.all([
       getMyTotalTransactionAmountAction(),
       getMyTotalTransactionCountAction(),
@@ -21,6 +22,7 @@ export async function getDashboardDataAction() {
       getMyBudgetDistributionAction(),
       getMyPieChartDataAction(),
       getMyLastTransactionsAction(5),
+      getMyDailyExpenseAction(30)
     ]);
 
   return {
@@ -30,5 +32,6 @@ export async function getDashboardDataAction() {
     budgetdata,
     piedata,
     lastransactions,
+    dailyExpenses
   };
 }

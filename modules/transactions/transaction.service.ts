@@ -190,6 +190,41 @@ export class TransactionService {
       },
     });
   }
+
+  async getDailyExpenses(userId: string, days: number = 30) {
+    const from = new Date();
+    from.setDate(from.getDate() - days);
+
+    const transactions = await this.repo.findByUserIdAndPeriod(userId, from);
+
+    //regroupe les transactions par jour
+    const byDay: Record<string, number> = {};
+    transactions.forEach((tx) => {
+      const key = new Date(tx.createdAt).toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "2-digit",
+      });
+      byDay[key] = (byDay[key] ?? 0) + tx.amount;
+    });
+
+    //remplit les jours sans transaction avec des 0
+    const result = [];
+    const today = new Date();
+
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+
+      const key = d.toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "2-digit",
+      });
+
+      result.push({ date: key, montant: byDay[key] ?? 0 });
+    }
+
+    return result;
+  }
 }
 
 export const transactionService = new TransactionService();

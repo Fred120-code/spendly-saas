@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Wrapper from "../components/Wrapper";
 import { useUser } from "@clerk/nextjs";
 import {
@@ -18,14 +18,14 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  Pie,
-  PieChart,
+  AreaChart,
+  Area,
 } from "recharts";
 import ChatIA from "../components/ChatIA";
 import RapportAI from "../components/RapportAI";
 import { fetchDashboardData } from "@/store/dashboardSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-
+import { getMyDailyExpenseAction } from "@/modules/transactions/transaction.actions";
 
 const page = () => {
   const { user } = useUser();
@@ -39,14 +39,13 @@ const page = () => {
     budgetData,
     pieData,
     transactions,
+    dailyExpenses,
     loading,
   } = useAppSelector((state) => state.dashboard);
 
-
   useEffect(() => {
-    
-    if(user) {
-      dispatch(fetchDashboardData())
+    if (user) {
+      dispatch(fetchDashboardData());
     }
   }, [user, dispatch]);
 
@@ -141,124 +140,119 @@ const page = () => {
               tone={totalRemaining < 0 ? "danger" : "success"}
             />
           </div>
-
           {/* Charts Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Bar Chart */}
-            <div className="lg:col-span-2 p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 hover:border-[#E0FF67]/40 transition-all duration-300 cursor-pointer">
-              <h3 className="text-xl font-bold text-white mb-6">
-                Suivi par Budget
-              </h3>
-              <div className="w-full overflow-x-auto cursor-pointer">
-                {budgetData && budgetData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart
-                      data={budgetData}
-                      margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
-                    >
-                      <XAxis dataKey="budgetName" stroke="#E0FF67" />
-                      <YAxis hide />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "#151425",
-                          border: "1px solid #E0FF67",
-                          borderRadius: "8px",
-                        }}
-                      />
-                      <Bar
-                        dataKey="totalBudgetAmount"
-                        fill="#E0FF67"
-                        radius={[8, 8, 0, 0]}
-                      >
-                        {budgetData.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={["#E0FF67", "#c4e933", "#a8d600"][index % 3]}
-                          />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex items-center justify-center h-80 text-gray-400">
-                    Aucune donnée disponible
-                  </div>
-                )}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Double BarChart — visible uniquement sur grand écran */}
+            <div className="hidden lg:block p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 hover:border-[#E0FF67]/40 transition-all duration-300">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xl font-bold text-white">
+                  Budget vs Dépenses
+                </h3>
+                <div className="flex items-center gap-4 text-xs text-gray-400">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-sm bg-[#E0FF67] inline-block" />
+                    Alloué
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-sm bg-[#FF4C4C] inline-block" />
+                    Dépensé
+                  </span>
+                </div>
               </div>
-            </div>
+              <p className="text-gray-500 text-xs mb-6">
+                Comparaison par catégorie de budget
+              </p>
 
-            {/* Pie Chart + légende */}
-            <div className="p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 hover:border-[#E0FF67]/40 transition-all duration-300 cursor-pointer">
-              <h3 className="text-xl font-bold text-white mb-6">Répartition</h3>
-              {pieData && pieData.length > 0 ? (
-                <>
-                  <ResponsiveContainer width="100%" height={220}>
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={50}
-                        outerRadius={80}
-                      >
-                        {pieData.map((entry, index) => (
-                          <Cell
-                            key={`slice-${index}`}
-                            fill={
-                              [
-                                "#E0FF67",
-                                "#c4e933",
-                                "#1F17C4",
-                                "#F9B93E",
-                                "#FF4C4C",
-                              ][index % 5]
-                            }
-                          />
-                        ))}
-                      </Pie>
-
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "#151425",
-                          border: "1px solid #E0FF67",
-                          borderRadius: "8px",
-                          color: "#fffff",
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className="flex flex-wrap gap-3 mt-4 justify-center">
-                    {pieData.map((entry, index) => (
-                      <div
-                        key={entry.name}
-                        className="flex items-center gap-1.5"
-                      >
-                        <span
-                          className="w-2.5 h-2.5 rounded-full shrink-0"
-                          style={{
-                            backgroundColor: [
-                              "#E0FF67",
-                              "#c4e933",
-                              "#1F17C4",
-                              "#F9B93E",
-                              "#FF4C4C",
-                            ][index % 5],
-                          }}
-                        />
-                        <span className="text-xs text-gray-400">
-                          {entry.name}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </>
+              {budgetData && budgetData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart
+                    data={budgetData}
+                    margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+                    barCategoryGap="30%"
+                    barGap={4}
+                  >
+                    <XAxis
+                      dataKey="budgetName"
+                      stroke="#4B5563"
+                      tick={{ fill: "#9CA3AF", fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis hide />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#1D283A",
+                        border: "1px solid rgba(224,255,103,0.2)",
+                        borderRadius: "12px",
+                        color: "#fff",
+                        fontSize: "12px",
+                      }}
+                      formatter={(value: number, name: string) => [
+                        `${value.toLocaleString("fr-FR")} FCFA`,
+                        name === "totalBudgetAmount" ? "Alloué" : "Dépensé",
+                      ]}
+                      cursor={{ fill: "rgba(255,255,255,0.03)" }}
+                    />
+                    {/* Barre 1 : montant alloué */}
+                    <Bar
+                      dataKey="totalBudgetAmount"
+                      fill="#E0FF67"
+                      radius={[6, 6, 0, 0]}
+                      maxBarSize={32}
+                    />
+                    {/* Barre 2 : montant dépensé */}
+                    <Bar
+                      dataKey="totalTransactionAmount"
+                      fill="#FF4C4C"
+                      radius={[6, 6, 0, 0]}
+                      maxBarSize={32}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
               ) : (
-                <div className="flex items-center justify-center h-80 text-gray-400">
-                  Aucune donnée
+                <div className="flex items-center justify-center h-64 text-gray-500 text-sm">
+                  Aucun budget créé pour le moment
                 </div>
               )}
+            </div>
+
+            {/* AreaChart — évolution des dépenses sur 30 jours */}
+            <DailyExpensesChart/>
+
+            {/* Sur mobile : version simplifiée à la place du double BarChart */}
+            <div className="lg:hidden p-6 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20">
+              <h3 className="text-lg font-bold text-white mb-4">Budgets</h3>
+              <div className="space-y-4">
+                {budgetData.map((b) => {
+                  const pct =
+                    b.totalBudgetAmount > 0
+                      ? Math.min(
+                          (b.totalTransactionAmount / b.totalBudgetAmount) *
+                            100,
+                          100,
+                        )
+                      : 0;
+                  const status =
+                    pct >= 100 ? "#FF4C4C" : pct >= 70 ? "#E0FF67" : "#3EF583";
+                  return (
+                    <div key={b.budgetName}>
+                      <div className="flex justify-between text-xs text-gray-400 mb-1">
+                        <span>{b.budgetName}</span>
+                        <span style={{ color: status }}>
+                          {b.totalTransactionAmount.toLocaleString("fr-FR")} /{" "}
+                          {b.totalBudgetAmount.toLocaleString("fr-FR")} FCFA
+                        </span>
+                      </div>
+                      <div className="w-full h-2 rounded-full bg-white/5 overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{ width: `${pct}%`, backgroundColor: status }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
@@ -336,7 +330,7 @@ const page = () => {
       )}
     </Wrapper>
   );
-};;
+};
 
 /** Carte KPI réutilisable, accent variable selon `tone`. */
 function KpiCard({
@@ -411,6 +405,147 @@ function DashboardSkeleton() {
         <div className="h-80 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-white/5" />
       </div>
       <div className="h-64 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-white/5" />
+    </div>
+  );
+}
+
+const PERIODS = [
+  { label: "30j", days: 30 },
+  { label: "90j", days: 90 },
+  { label: "180j", days: 180 },
+];
+
+function DailyExpensesChart() {
+  const [activeDays, setActiveDays] = useState(30);
+  const [data, setData] = useState<{ date: string; montant: number }[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    getMyDailyExpenseAction(activeDays)
+      .then(setData)
+      .finally(() => setLoading(false));
+  }, [activeDays]);
+
+  // Calcul du total sur la période affichée
+  const total = data.reduce((sum, d) => sum + d.montant, 0);
+
+  // Jour avec la dépense la plus haute (pour l'annotation)
+  const peak = data.reduce((max, d) => (d.montant > max.montant ? d : max), {
+    date: "",
+    montant: 0,
+  });
+
+  return (
+    <div className="lg:col-span-1 p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 hover:border-[#E0FF67]/40 transition-all duration-300">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-6">
+        <div>
+          <h3 className="text-xl font-bold text-white">
+            Évolution des dépenses
+          </h3>
+          <p className="text-gray-500 text-xs mt-1">
+            Total sur la période :{" "}
+            <span className="text-[#E0FF67] font-semibold">
+              {total.toLocaleString("fr-FR")} FCFA
+            </span>
+          </p>
+        </div>
+
+        {/* Sélecteur de période */}
+        <div className="flex items-center gap-1 bg-black/20 rounded-xl p-1 border border-white/5 shrink-0">
+          {PERIODS.map(({ label, days }) => (
+            <button
+              key={days}
+              onClick={() => setActiveDays(days)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                activeDays === days
+                  ? "bg-[#E0FF67] text-[#151425] shadow-[0_0_10px_rgba(224,255,103,0.3)]"
+                  : "text-gray-400 hover:text-white"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Pic de dépense */}
+      {peak.montant > 0 && !loading && (
+        <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-lg bg-white/5 border border-white/5">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#E0FF67] shrink-0" />
+          <p className="text-xs text-gray-400">
+            Journée la plus chargée :{" "}
+            <span className="text-white font-medium">{peak.date}</span>
+            {" — "}
+            <span className="text-[#E0FF67] font-semibold">
+              {peak.montant.toLocaleString("fr-FR")} FCFA
+            </span>
+          </p>
+        </div>
+      )}
+
+      {/* Chart */}
+      {loading ? (
+        <div className="h-64 rounded-xl bg-white/5 animate-pulse" />
+      ) : data.length === 0 || total === 0 ? (
+        <div className="flex flex-col items-center justify-center h-64 text-gray-500 text-sm gap-2">
+          Aucune dépense sur cette période
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={240}>
+          <AreaChart
+            data={data}
+            margin={{ top: 10, right: 4, left: 0, bottom: 0 }}
+          >
+            <defs>
+              <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#E0FF67" stopOpacity={0.25} />
+                <stop offset="100%" stopColor="#E0FF67" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <XAxis
+              dataKey="date"
+              stroke="#4B5563"
+              tick={{ fill: "#6B7280", fontSize: 10 }}
+              axisLine={false}
+              tickLine={false}
+              // Adapte automatiquement le nombre de labels à la période
+              interval={activeDays === 30 ? 4 : activeDays === 90 ? 14 : 29}
+            />
+            <YAxis hide />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#1D283A",
+                border: "1px solid rgba(224,255,103,0.2)",
+                borderRadius: "12px",
+                color: "#fff",
+                fontSize: "12px",
+                padding: "8px 12px",
+              }}
+              formatter={(value: number) => [
+                `${value.toLocaleString("fr-FR")} FCFA`,
+                "Dépensé",
+              ]}
+              cursor={{ stroke: "rgba(224,255,103,0.15)", strokeWidth: 1 }}
+            />
+            <Area
+              type="monotone"
+              dataKey="montant"
+              stroke="#E0FF67"
+              strokeWidth={2}
+              fill="url(#areaGradient)"
+              dot={false}
+              activeDot={{
+                r: 5,
+                fill: "#E0FF67",
+                stroke: "#151425",
+                strokeWidth: 2,
+              }}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 }

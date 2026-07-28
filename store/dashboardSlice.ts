@@ -20,8 +20,12 @@ interface DashboardState {
   budgetData: BudgetDistribution[];
   pieData: PieDatum[];
   transactions: Transactions[];
+  dailyExpenses: {
+    date: string;
+    montant: number;
+  }[];
   loading: boolean;
-  loaded: boolean; 
+  loaded: boolean;
   error: string | null;
 }
 
@@ -32,6 +36,7 @@ const initialState: DashboardState = {
   budgetData: [],
   pieData: [],
   transactions: [],
+  dailyExpenses: [],
   loading: false,
   loaded: false,
   error: null,
@@ -82,6 +87,7 @@ const dashboardSlice = createSlice({
         state.totalEndBuget = data.endBuget ?? null;
         state.budgetData = data.budgetdata ?? [];
         state.pieData = data.piedata ?? [];
+        state.dailyExpenses = data.dailyExpenses ?? []
 
         state.transactions = (data.lastransactions ?? []).map((tx) => {
           const rawTx = tx as Record<string, unknown>;

@@ -48,3 +48,9 @@ export async function getMyTotalTransactionCountAction() {
   const user = await requireCurrentUser();
   return transactionService.getTotalCountForUser(user.id);
 }
+
+
+export async function getMyDailyExpenseAction(days:number = 30) {
+  const user = await requireCurrentUser()
+  return transactionService.getDailyExpenses(user.id, days)
+}
