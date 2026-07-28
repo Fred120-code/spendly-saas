@@ -1,0 +1,53 @@
+name: CI
+
+# Se déclenche sur chaque push sur n'importe quelle branche,
+# et sur chaque Pull Request vers main.
+on:
+  push:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    name: Lint + Tests + Build
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Récupère le code source
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Installe Node.js 20
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      # 3. Installe les dépendances (npm ci = installation propre depuis le lockfile)
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. Lance ESLint
+      - name: Lint
+        run: npm run lint
+
+      # 5. Lance les tests unitaires Vitest
+      - name: Tests
+        run: npm run test
+
+      # 6. Vérifie que le build Next.js passe
+      # On injecte des valeurs factices pour les variables NEXT_PUBLIC_*
+      # qui sont nécessaires au moment du build (sans elles, Next.js plante).
+      # Les vraies valeurs ne sont jamais exposées ici.
+      - name: Build
+        run: npm run build
+        env:
+          DATABASE_URL: "mongodb://localhost/spendly_ci"
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          NEXT_PUBLIC_CLERK_SIGN_UP_URL: /sign-up
+          NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
+          NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL: /dashboard
+          NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL: /

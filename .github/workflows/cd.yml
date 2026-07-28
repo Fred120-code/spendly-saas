@@ -1,0 +1,44 @@
+name: CD
+
+# Se déclenche UNIQUEMENT quand un push atterrit sur main
+# ET seulement si le job CI a réussi (via workflow_run).
+on:
+  workflow_run:
+    workflows: ["CI"]
+    branches: [main]
+    types: [completed]
+
+jobs:
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+
+    # Ne tourne que si la CI a réussi — pas de déploiement si les tests plantent.
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Se connecte au VPS via SSH et exécute les commandes de déploiement.
+      # Les secrets SSH sont configurés dans GitHub → Settings → Secrets.
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /root/spendly
+
+            # Récupère les dernières modifications depuis GitHub
+            git pull origin main
+
+            # Rebuilde et redémarre les conteneurs (--build force le rebuild de l'image)
+            docker compose -f docker/docker-compose.yml up -d --build \
+              --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+
+            # Supprime les anciennes images inutilisées pour libérer de l'espace disque
+            docker image prune -f
+
+            echo "✓ Déploiement terminé"
