@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "seed": "tsx prisma/seed.ts",
+    "seed:clear": "tsx prisma/clear-seed.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.33.3",
@@ -41,6 +43,7 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.9",
+    "tsx": "^4.19.2"
   }
 }
