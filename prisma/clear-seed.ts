@@ -2,7 +2,6 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-//  Même email que dans seed.ts
 const TARGET_EMAIL = "fredayemtsa@gmail.com";
 
 async function main() {
@@ -36,7 +35,7 @@ async function main() {
 
 main()
   .catch((e) => {
-    console.error("✗ Erreur :", e);
+    console.error(" Erreur :", e);
     process.exit(1);
   })
   .finally(async () => {

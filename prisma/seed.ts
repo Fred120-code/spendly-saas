@@ -103,7 +103,7 @@ function randomDateInRange(daysAgo: number): Date {
 }
 
 async function main() {
-  console.log(`\n🌱 Seed en cours pour : ${TARGET_EMAIL}\n`);
+  console.log(`\nSeed en cours pour : ${TARGET_EMAIL}\n`);
 
   const user = await prisma.user.upsert({
     where: { email: TARGET_EMAIL },
@@ -111,7 +111,7 @@ async function main() {
     create: { email: TARGET_EMAIL },
   });
 
-  console.log(`✓ Utilisateur prêt (id: ${user.id})\n`);
+  console.log(`Utilisateur prêt (id: ${user.id})\n`);
 
   for (const budgetData of BUDGETS) {
     // Crée le budget
@@ -146,12 +146,12 @@ async function main() {
     );
   }
 
-  console.log("\n✅ Seed terminé avec succès !\n");
+  console.log("\nSeed terminé avec succès !\n");
 }
 
 main()
   .catch((e) => {
-    console.error("✗ Erreur pendant le seed :", e);
+    console.error("Erreur pendant le seed :", e);
     process.exit(1);
   })
   .finally(async () => {
