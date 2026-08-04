@@ -1,8 +1,6 @@
 "use client";
 
-import {
-  deleteMyBudgetAction,
-} from "@/modules/budgets/budget.actions";
+import { deleteMyBudgetAction } from "@/modules/budgets/budget.actions";
 import {
   addTransactionAction,
   deleteMyTransactionAction,
@@ -18,7 +16,7 @@ import {
   AlertCircle,
   Pencil,
   X,
-  ChevronLeftCircle
+  ChevronLeftCircle,
 } from "lucide-react";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -30,6 +28,7 @@ import {
   invalidateAll,
 } from "@/store/budgetsSlice";
 import { invalidateDashboard } from "@/store/dashboardSlice";
+import ConfirmMoal from "@/app/components/ConfirmModal";
 
 const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
   const dispatch = useAppDispatch();
@@ -44,6 +43,23 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
   const [editDescription, setEditDescription] = useState<string>("");
   const [editAmount, setEditAmount] = useState<string>("");
   const [savingEdit, setSavingEdit] = useState<boolean>(false);
+
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmLabel?: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    confirmLabel: "Supprimer",
+    onConfirm: () => {},
+  });
+
+  const closeConfirm = () =>
+    setConfirmModal((prev) => ({ ...prev, isOpen: false }));
 
   // Lecture depuis le store
   const { selectedBudget: budget, selectedLoading: loading } = useAppSelector(
@@ -63,7 +79,6 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
     };
     getId();
   }, []);
-
 
   const handleAddTransaction = async () => {
     if (!amount || !description) {
@@ -104,46 +119,53 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
   };
 
   const handleDeletBudget = async () => {
-    const confirmed = window.confirm(
-      "Êtes-vous sûr ? Cette action est irréversible.",
-    );
-    if (confirmed) {
-      try {
-        await deleteMyBudgetAction(budgetId);
+    setConfirmModal({
+      isOpen: true,
+      title: "Supprime le budget",
+      message: `Vous êtes sur le point de supprimer le budget "${budget?.name}" et toutes ses transactions. Cette action est irréversible.`,
+      confirmLabel: "Supprimer le budget",
+      onConfirm: async () => {
+        closeConfirm();
 
-        // Le budget disparaît,invalide tout
-        dispatch(invalidateAll());
-        dispatch(invalidateDashboard());
+        try {
+          await deleteMyBudgetAction(budgetId);
 
-        setNotification("✓ Budget supprimé");
-        setTimeout(() => redirect("/budgets"), 1500);
-      } catch (error) {
-        console.error("Erreur lors de la suppression du budget");
-        setNotification("✗ Erreur lors de la suppression");
-      }
-    }
+          // Le budget disparaît,invalide tout
+          dispatch(invalidateAll());
+          dispatch(invalidateDashboard());
+
+          setNotification("✓ Budget supprimé");
+          setTimeout(() => redirect("/budgets"), 1500);
+        } catch (error) {
+          console.error("Erreur lors de la suppression du budget");
+          setNotification("✗ Erreur lors de la suppression");
+        }
+      },
+    });
   };
 
   const handleDeletTransaction = async (transactionId: string) => {
-    const confirmed = window.confirm(
-      "Êtes-vous sûr de vouloir supprimer cette transaction ?",
-    );
-    if (confirmed) {
-      try {
-        await deleteMyTransactionAction(transactionId);
-
-        dispatch(invalidateSelectedBudget());
-        dispatch(invalidateBudgetList());
-        dispatch(invalidateDashboard());
-        dispatch(fetchBudgetById(budgetId));
-
-        setNotification("✓ Transaction supprimée");
-        setTimeout(() => setNotification(""), 3000);
-      } catch (error) {
-        console.error("Erreur lors de la suppression de la transaction");
-        setNotification("✗ Erreur lors de la suppression");
-      }
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: "Supprimer la transaction",
+      message:
+        "Cette transaction sera supprimée définitivement. Voulez-vous continuer ?",
+      confirmLabel: "Supprimer",
+      onConfirm: async () => {
+        closeConfirm();
+        try {
+          await deleteMyTransactionAction(transactionId);
+          dispatch(invalidateSelectedBudget());
+          dispatch(invalidateBudgetList());
+          dispatch(invalidateDashboard());
+          dispatch(fetchBudgetById(budgetId));
+          setNotification("✓ Transaction supprimée");
+          setTimeout(() => setNotification(""), 3000);
+        } catch (error) {
+          setNotification("✗ Erreur lors de la suppression");
+        }
+      },
+    });
   };
 
   const handleOpenEdit = (transaction: Transactions) => {
@@ -223,9 +245,10 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
       {budget && (
         <div className="space-y-8">
           {/* Budget Overview Card */}
-          <div className="p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2
-           border border-[#E0FF67]/20">
-
+          <div
+            className="p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2
+           border border-[#E0FF67]/20"
+          >
             <div className="flex flex-col md:flex-row gap-8 items-start md:items-center justify-between">
               {/* Budget Info */}
               <div className="flex items-center gap-6 flex-1">
@@ -283,12 +306,10 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                   style={{ width: `${Math.min(percentageUsed, 100)}%` }}
                 ></div>
               </div>
-
             </div>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-[#E0FF67]/10">
-
               <div>
                 <p className="text-gray-400 text-xs mb-1">Dépensé</p>
                 <p className="text-xl font-bold text-white">
@@ -314,16 +335,12 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                 </p>
                 <p className="text-xs text-gray-600">total</p>
               </div>
-
             </div>
-
           </div>
 
           {/* Warning if Budget Exceeded */}
           {remaining < 0 && (
-
             <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-3">
-
               <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
               <p className="text-red-400 text-sm">
                 Budget dépassé de{" "}
@@ -331,13 +348,11 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                   {Math.abs(remaining).toLocaleString("fr-FR")} FCFA
                 </span>
               </p>
-
             </div>
           )}
 
           {/* Add Transaction Form */}
           {isOpenCreate && (
-
             <div className="fixed inset-0 z-50 flex items-center justify-center">
               <div
                 className="fixed inset-0 bg-black/60 backdrop-blur-sm"
@@ -473,8 +488,6 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                   </table>
                 </div>
 
-
-
                 {/* Mobile Cards */}
                 <div className="lg:hidden space-y-3">
                   {budget?.transactions?.map((transaction) => (
@@ -598,6 +611,15 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
           </div>
         </div>
       )}
+
+      <ConfirmMoal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmLabel={confirmModal.confirmLabel}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={closeConfirm}
+      />
     </Wrapper>
   );
 };
