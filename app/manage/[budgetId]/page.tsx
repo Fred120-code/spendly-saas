@@ -516,7 +516,10 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                           <Trash className="w-5 h-5" />
                         </button>
                       </div>
-                      <div>
+                      <div className="flex justify-between">
+                        <p className="font-bold text-red-400 ">
+                          -{transaction.amount.toLocaleString("fr-FR")} FCFA
+                        </p>
                         <button
                           className="flex items-center gap-1 text-xs text-[#E0FF67] hover:text-white transition-colors"
                           onClick={() => handleOpenEdit(transaction)}
@@ -524,9 +527,6 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                           <Pencil className="w-3.5 h-3.5" />
                           Modifier
                         </button>
-                        <p className="font-bold text-red-400 text-right">
-                          -{transaction.amount.toLocaleString("fr-FR")} FCFA
-                        </p>
                       </div>
                     </div>
                   ))}
