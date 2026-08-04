@@ -17,6 +17,8 @@ import {
   Pencil,
   X,
   ChevronLeftCircle,
+  MoreVertical,
+  Plus,
 } from "lucide-react";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -57,6 +59,21 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
     confirmLabel: "Supprimer",
     onConfirm: () => {},
   });
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+
+  // Ferme le menu si on clique en dehors
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
 
   const closeConfirm = () =>
     setConfirmModal((prev) => ({ ...prev, isOpen: false }));
@@ -245,99 +262,183 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
       {budget && (
         <div className="space-y-8">
           {/* Budget Overview Card */}
-          <div
-            className="p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2
-           border border-[#E0FF67]/20"
-          >
-            <div className="flex flex-col md:flex-row gap-8 items-start md:items-center justify-between">
-              {/* Budget Info */}
-              <div className="flex items-center gap-6 flex-1">
-                <div className="text-6xl">{budget.emoji}</div>
-                <div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
-                    {budget.name}
-                  </h2>
-                  <p className="text-gray-400 text-sm">
-                    Budget total:{" "}
-                    <span className="font-bold text-[#E0FF67]">
-                      {budget.amount.toLocaleString("fr-FR")} FCFA
-                    </span>
-                  </p>
+          <div className="relative rounded-2xl overflow-hidden border border-[#E0FF67]/20 hover:border-[#E0FF67]/35 transition-all duration-300">
+            {/* Fond avec dégradé directionnel */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/2" />
+            {/* Halo accent discret en haut à droite */}
+            <div className="absolute -top-16 -right-16 w-48 h-48 bg-[#E0FF67]/5 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative p-6 lg:p-8">
+              {/* Header : identité du budget + menu trois points */}
+              <div className="flex items-start justify-between gap-4 mb-8">
+                {/* Emoji + nom + montant */}
+                <div className="flex items-center gap-5">
+                  {/* Emoji dans un cadre glassmorphism */}
+                  <div className="relative shrink-0">
+                    <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-2xl bg-[#E0FF67]/10 border border-[#E0FF67]/20 flex items-center justify-center text-4xl lg:text-5xl">
+                      {budget.emoji}
+                    </div>
+                    {/* Indicateur de statut */}
+                    <span
+                      className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[#161f2e] ${
+                        percentageUsed >= 100
+                          ? "bg-[#FF4C4C]"
+                          : percentageUsed >= 75
+                            ? "bg-yellow-400"
+                            : "bg-[#3EF583]"
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <p className="text-gray-500 text-xs font-medium uppercase tracking-widest mb-1">
+                      Budget
+                    </p>
+                    <h2 className="text-2xl lg:text-3xl font-bold text-white leading-tight">
+                      {budget.name}
+                    </h2>
+                    <p className="text-[#E0FF67] font-semibold text-sm mt-1">
+                      {budget.amount.toLocaleString("fr-FR")} FCFA alloués
+                    </p>
+                  </div>
+                </div>
+
+                {/* Menu trois points */}
+                <div className="relative shrink-0" ref={menuRef}>
+                  <button
+                    onClick={() => setMenuOpen((v) => !v)}
+                    className={`p-2.5 rounded-xl border transition-all duration-200 ${
+                      menuOpen
+                        ? "bg-[#E0FF67]/10 border-[#E0FF67]/40 text-[#E0FF67]"
+                        : "bg-white/5 border-white/10 text-gray-400 hover:text-white hover:border-white/20"
+                    }`}
+                  >
+                    <MoreVertical className="w-5 h-5" />
+                  </button>
+
+                  {/* Dropdown */}
+                  {menuOpen && (
+                    <div
+                      className="absolute right-0 top-full mt-2 w-52 rounded-xl bg-[#121720] border border-white/10 shadow-2xl 
+                    shadow-black/40 overflow-hidden z-20 "
+                    >
+                      <button
+                        onClick={() => {
+                          setMenuOpen(false);
+                          setIsOpenCreate(true);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-[#E0FF67]/10
+                         hover:text-[#E0FF67] transition-colors cursor-pointer"
+                      >
+                        <div className="w-7 h-7 rounded-lg bg-[#E0FF67]/10 flex items-center justify-center shrink-0">
+                          <Plus className="w-4 h-4 text-[#E0FF67]" />
+                        </div>
+                        Ajouter une transaction
+                      </button>
+
+                      <div className="h-px bg-white/5 mx-3" />
+
+                      <button
+                        onClick={() => {
+                          setMenuOpen(false);
+                          handleDeletBudget();
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 
+                        hover:bg-red-500/10 transition-colors cursor-pointer"
+                      >
+                        <div
+                          className="w-7 h-7 rounded-lg bg-red-500/10 flex items-center 
+                        justify-center shrink-0"
+                        >
+                          <Trash className="w-4 h-4 text-red-400" />
+                        </div>
+                        Supprimer le budget
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Add transaction button */}
-              <button
-                onClick={() => setIsOpenCreate(true)}
-                className="px-4 py-2 bg-green-500/20 border border-green-500/50 text-green-400 
-                rounded-lg hover:bg-green-500/30 transition-all text-sm font-medium cursor-pointer"
-              >
-                Ajouter une transacton
-              </button>
-
-              {/* Delete Button */}
-              <button
-                onClick={handleDeletBudget}
-                className="px-4 py-2 bg-red-500/20 border border-red-500/50 text-red-400 rounded-lg
-                 hover:bg-red-500/30 transition-all text-sm font-medium cursor-pointer"
-              >
-                <Trash className="w-5 h-5 text-red-400" />
-              </button>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="mt-6">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-gray-400 text-sm">Utilisation du budget</p>
-                <p className="text-[#E0FF67] font-bold">
-                  {percentageUsed.toFixed(1)}%
-                </p>
+              {/* Barre de progression */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-gray-400 text-xs font-medium">
+                    Utilisation du budget
+                  </span>
+                  <span
+                    className={`text-sm font-bold ${
+                      percentageUsed >= 100
+                        ? "text-[#FF4C4C]"
+                        : percentageUsed >= 75
+                          ? "text-yellow-400"
+                          : "text-[#E0FF67]"
+                    }`}
+                  >
+                    {percentageUsed.toFixed(1)}%
+                  </span>
+                </div>
+                {/* Track */}
+                <div className="w-full h-2.5 bg-white/5 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{
+                      width: `${Math.min(percentageUsed, 100)}%`,
+                      background:
+                        percentageUsed >= 100
+                          ? "#FF4C4C"
+                          : percentageUsed >= 75
+                            ? "#FACC15"
+                            : "linear-gradient(90deg, #E0FF67, #c4e933)",
+                    }}
+                  />
+                </div>
+                {/* Labels min/max */}
+                <div className="flex justify-between mt-1.5">
+                  <span className="text-gray-600 text-[10px]">0 FCFA</span>
+                  <span className="text-gray-600 text-[10px]">
+                    {budget.amount.toLocaleString("fr-FR")} FCFA
+                  </span>
+                </div>
               </div>
 
-              <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden border border-[#E0FF67]/20">
-                <div
-                  className={`h-full transition-all ${
-                    percentageUsed > 100
-                      ? "bg-red-500"
-                      : percentageUsed > 75
-                        ? "bg-yellow-500"
-                        : "bg-gradient-to-r from-[#E0FF67] to-[#c4e933]"
-                  }`}
-                  style={{ width: `${Math.min(percentageUsed, 100)}%` }}
-                ></div>
-              </div>
-            </div>
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-3 pt-5 border-t border-white/5">
+                <div className="flex flex-col gap-1">
+                  <p className="text-gray-500 text-[10px] font-medium uppercase tracking-wider">
+                    Dépensé
+                  </p>
+                  <p className="text-lg lg:text-xl font-bold text-white">
+                    {totalSpent.toLocaleString("fr-FR")}
+                  </p>
+                  <p className="text-[10px] text-gray-600">FCFA</p>
+                </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-[#E0FF67]/10">
-              <div>
-                <p className="text-gray-400 text-xs mb-1">Dépensé</p>
-                <p className="text-xl font-bold text-white">
-                  {totalSpent.toLocaleString("fr-FR")}
-                </p>
-                <p className="text-xs text-gray-600">FCFA</p>
-              </div>
+                <div className="flex flex-col gap-1 border-x border-white/5 px-3">
+                  <p className="text-gray-500 text-[10px] font-medium uppercase tracking-wider">
+                    Restant
+                  </p>
+                  <p
+                    className={`text-lg lg:text-xl font-bold ${
+                      remaining < 0 ? "text-[#FF4C4C]" : "text-[#E0FF67]"
+                    }`}
+                  >
+                    {remaining.toLocaleString("fr-FR")}
+                  </p>
+                  <p className="text-[10px] text-gray-600">FCFA</p>
+                </div>
 
-              <div>
-                <p className="text-gray-400 text-xs mb-1">Restant</p>
-                <p
-                  className={`text-xl font-bold ${remaining < 0 ? "text-red-400" : "text-[#E0FF67]"}`}
-                >
-                  {remaining.toLocaleString("fr-FR")}
-                </p>
-                <p className="text-xs text-gray-600">FCFA</p>
-              </div>
-
-              <div>
-                <p className="text-gray-400 text-xs mb-1">Transactions</p>
-                <p className="text-xl font-bold text-white">
-                  {budget.transactions?.length || 0}
-                </p>
-                <p className="text-xs text-gray-600">total</p>
+                <div className="flex flex-col gap-1 pl-3">
+                  <p className="text-gray-500 text-[10px] font-medium uppercase tracking-wider">
+                    Transactions
+                  </p>
+                  <p className="text-lg lg:text-xl font-bold text-white">
+                    {budget.transactions?.length || 0}
+                  </p>
+                  <p className="text-[10px] text-gray-600">au total</p>
+                </div>
               </div>
             </div>
           </div>
-
           {/* Warning if Budget Exceeded */}
           {remaining < 0 && (
             <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-3">
