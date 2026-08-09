@@ -4,8 +4,7 @@ import React, { useEffect, useState } from "react";
 import Wrapper from "../components/Wrapper";
 import { useUser } from "@clerk/nextjs";
 import EmojiPicker from "emoji-picker-react";
-import {
-  createBudgetAction} from "@/modules/budgets/budget.actions";
+import { createBudgetAction } from "@/modules/budgets/budget.actions";
 import Notification from "../components/Notification";
 import {
   Plus,
@@ -35,7 +34,8 @@ const page = () => {
   const [showEmoji, setShowEmoji] = useState<boolean>(false);
   const [selectedEmoji, setSelectedEmoji] = useState<string>("");
   const [notification, setNotification] = useState<string>("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const closeNotification = () => {
     setNotification("");
@@ -48,13 +48,12 @@ const page = () => {
     setShowEmoji(false);
   };
 
-
   useEffect(() => {
-    dispatch(fetchBudgets())
+    dispatch(fetchBudgets());
   }, [user.user, dispatch]);
 
-
   const handleAddBuget = async () => {
+    setIsLoading(true);
     try {
       const amount = parseFloat(budgetAmount);
       if (isNaN(amount) || amount <= 0) {
@@ -80,7 +79,7 @@ const page = () => {
       // Recharge la liste fraîche dans le store
       dispatch(fetchBudgets());
 
-      closeModal()
+      closeModal();
       setNotification("✓ Nouveau budget créé avec succès");
       setBudgetName("");
       setBudgetAmount("");
@@ -91,9 +90,10 @@ const page = () => {
     } catch (error) {
       setNotification(`✗ ${error}`);
       setTimeout(() => setNotification(""), 3000);
+    } finally {
+      setIsLoading(false);
     }
   };
-
 
   // --- Stats globales dérivées de la liste de budgets déjà chargée ---
   const totalAllocated = budgets.reduce((sum, b) => sum + b.amount, 0);
@@ -273,7 +273,7 @@ const page = () => {
                 </button>
                 <button
                   onClick={handleAddBuget}
-                  disabled={!budgetName || !budgetAmount || !selectedEmoji}
+                  disabled={!budgetName || !budgetAmount || !selectedEmoji || isLoading}
                   className="flex-1 px-4 py-3 bg-gradient-to-r from-[#E0FF67] to-[#c4e933] text-[#151425] rounded-lg font-bold hover:shadow-lg hover:shadow-[#E0FF67]/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Créer le budget
@@ -329,6 +329,6 @@ const page = () => {
       </div>
     </Wrapper>
   );
-};;
+};
 
 export default page;
