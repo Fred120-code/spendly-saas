@@ -45,6 +45,7 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
   const [editDescription, setEditDescription] = useState<string>("");
   const [editAmount, setEditAmount] = useState<string>("");
   const [savingEdit, setSavingEdit] = useState<boolean>(false);
+  const [isLoading, setIsloading] = useState<boolean>(false);
 
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
@@ -74,7 +75,6 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-
   const closeConfirm = () =>
     setConfirmModal((prev) => ({ ...prev, isOpen: false }));
 
@@ -98,6 +98,8 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
   }, []);
 
   const handleAddTransaction = async () => {
+    setIsloading(true)
+
     if (!amount || !description) {
       setNotification("✗ Tous les champs sont requis");
       setTimeout(() => setNotification(""), 3000);
@@ -118,7 +120,6 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
         description,
       });
 
-      // La transaction change les totaux,invalide budget sélectionné + dashboard
       dispatch(invalidateSelectedBudget());
       dispatch(invalidateBudgetList());
       dispatch(invalidateDashboard());
@@ -128,9 +129,11 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
       setAmount("");
       setDescription("");
       setIsOpenCreate(false);
+      setIsloading(false);
       setTimeout(() => setNotification(""), 3000);
     } catch (error) {
       setNotification("✗ Budget atteint ou erreur lors de l'ajout");
+      setIsloading(false);
       setTimeout(() => setNotification(""), 3000);
     }
   };
@@ -327,6 +330,7 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                           setMenuOpen(false);
                           setIsOpenCreate(true);
                         }}
+                        disabled={isLoading}
                         className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-[#E0FF67]/10
                          hover:text-[#E0FF67] transition-colors cursor-pointer"
                       >
