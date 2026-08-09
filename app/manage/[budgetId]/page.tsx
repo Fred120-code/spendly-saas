@@ -98,7 +98,7 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
   }, []);
 
   const handleAddTransaction = async () => {
-    setIsloading(true)
+    setIsloading(true);
 
     if (!amount || !description) {
       setNotification("✗ Tous les champs sont requis");
@@ -129,12 +129,12 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
       setAmount("");
       setDescription("");
       setIsOpenCreate(false);
-      setIsloading(false);
       setTimeout(() => setNotification(""), 3000);
     } catch (error) {
       setNotification("✗ Budget atteint ou erreur lors de l'ajout");
-      setIsloading(false);
       setTimeout(() => setNotification(""), 3000);
+    } finally {
+      setIsloading(false);
     }
   };
 
@@ -265,11 +265,17 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
       {budget && (
         <div className="space-y-8">
           {/* Budget Overview Card */}
-          <div className="relative rounded-2xl overflow-hidden border border-[#E0FF67]/20 hover:border-[#E0FF67]/35 transition-all duration-300">
+          <div
+            className="relative rounded-2xl overflow-hidden border border-[#E0FF67]/20
+           hover:border-[#E0FF67]/35 transition-all duration-300"
+          >
             {/* Fond avec dégradé directionnel */}
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/2" />
             {/* Halo accent discret en haut à droite */}
-            <div className="absolute -top-16 -right-16 w-48 h-48 bg-[#E0FF67]/5 rounded-full blur-3xl pointer-events-none" />
+            <div
+              className="absolute -top-16 -right-16 w-48 h-48 bg-[#E0FF67]/5 rounded-full
+             blur-3xl pointer-events-none"
+            />
 
             <div className="relative p-6 lg:p-8">
               {/* Header : identité du budget + menu trois points */}
@@ -330,7 +336,6 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                           setMenuOpen(false);
                           setIsOpenCreate(true);
                         }}
-                        disabled={isLoading}
                         className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-[#E0FF67]/10
                          hover:text-[#E0FF67] transition-colors cursor-pointer"
                       >
@@ -463,7 +468,10 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                 className="fixed inset-0 bg-black/60 backdrop-blur-sm"
                 onClick={() => setIsOpenCreate(false)}
               />
-              <div className="relative lg:p-8 bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl shadow-black/40">
+              <div
+                className="relative lg:p-8 bg-gradient-to-br from-white/5 to-white/2 border
+               border-[#E0FF67]/20 rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl shadow-black/40"
+              >
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="font-bold text-xl text-white">
                     Ajouter une transaction
@@ -487,7 +495,8 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder="Ex: Courses, Essence, etc."
-                      className="w-full px-4 py-3 bg-white/5 border border-[#E0FF67]/30 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-[#E0FF67] transition-all"
+                      className="w-full px-4 py-3 bg-white/5 border border-[#E0FF67]/30 rounded-lg
+                       text-white placeholder-gray-600 focus:outline-none focus:border-[#E0FF67] transition-all"
                     />
                   </div>
 
@@ -501,13 +510,16 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
                       placeholder="0"
-                      className="w-full px-4 py-3 bg-white/5 border border-[#E0FF67]/30 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-[#E0FF67] transition-all"
+                      className="w-full px-4 py-3 bg-white/5 border border-[#E0FF67]/30 rounded-lg
+                       text-white placeholder-gray-600 focus:outline-none focus:border-[#E0FF67] transition-all"
                     />
                   </div>
 
                   <button
                     onClick={handleAddTransaction}
-                    className="w-full px-6 py-3 bg-gradient-to-r from-[#E0FF67] to-[#c4e933] text-[#151425] rounded-lg font-bold hover:shadow-lg hover:shadow-[#E0FF67]/50 transition-all"
+                    disabled={isLoading ? true : false}
+                    className="w-full px-6 py-3 bg-gradient-to-r from-[#E0FF67] to-[#c4e933]  cursor-pointer
+                    text-[#151425] rounded-lg font-bold hover:shadow-lg hover:shadow-[#E0FF67]/50 transition-all"
                   >
                     Ajouter la dépense
                   </button>
@@ -659,7 +671,10 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
             className="fixed inset-0 bg-black/60 backdrop-blur-sm"
             onClick={handleCancelEdit}
           />
-          <div className="relative bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl shadow-black/40">
+          <div
+            className="relative bg-gradient-to-br from-white/5 to-white/2 border
+           border-[#E0FF67]/20 rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl shadow-black/40"
+          >
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-bold text-xl text-white">
                 Modifier la transaction
@@ -681,7 +696,8 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                   type="text"
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-[#E0FF67]/30 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-[#E0FF67] transition-all"
+                  className="w-full px-4 py-3 bg-white/5 border border-[#E0FF67]/30 rounded-lg text-white
+                   placeholder-gray-600 focus:outline-none focus:border-[#E0FF67] transition-all"
                 />
               </div>
 
@@ -693,21 +709,24 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                   type="number"
                   value={editAmount}
                   onChange={(e) => setEditAmount(e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-[#E0FF67]/30 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-[#E0FF67] transition-all"
+                  className="w-full px-4 py-3 bg-white/5 border border-[#E0FF67]/30 rounded-lg text-white
+                   placeholder-gray-600 focus:outline-none focus:border-[#E0FF67] transition-all"
                 />
               </div>
 
               <div className="flex gap-3 pt-2">
                 <button
                   onClick={handleCancelEdit}
-                  className="flex-1 px-4 py-3 bg-white/5 border border-[#E0FF67]/30 text-white rounded-lg font-medium hover:border-[#E0FF67] transition-all"
+                  className="flex-1 px-4 py-3 bg-white/5 border border-[#E0FF67]/30 text-white rounded-lg 
+                  font-medium hover:border-[#E0FF67] transition-all"
                 >
                   Annuler
                 </button>
                 <button
                   onClick={handleSaveEdit}
                   disabled={savingEdit}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-[#E0FF67] to-[#c4e933] text-[#151425] rounded-lg font-bold hover:shadow-lg hover:shadow-[#E0FF67]/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-[#E0FF67] to-[#c4e933] text-[#151425] 
+                  rounded-lg font-bold hover:shadow-lg hover:shadow-[#E0FF67]/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {savingEdit ? "Enregistrement..." : "Enregistrer"}
                 </button>
