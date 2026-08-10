@@ -316,7 +316,7 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                 <div className="relative shrink-0" ref={menuRef}>
                   <button
                     onClick={() => setMenuOpen((v) => !v)}
-                    className={`p-2.5 rounded-xl border transition-all duration-200 ${
+                    className={`p-2.5 rounded-xl border transition-all duration-200 cursor-pointer ${
                       menuOpen
                         ? "bg-[#E0FF67]/10 border-[#E0FF67]/40 text-[#E0FF67]"
                         : "bg-white/5 border-white/10 text-gray-400 hover:text-white hover:border-white/20"
@@ -584,15 +584,15 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
                           <td className="py-4 px-4 text-center">
                             <div className="flex items-center justify-center gap-2">
                               <button
-                                className="p-2 hover:bg-[#E0FF67]/20 text-[#E0FF67] hover:text-white rounded-lg transition-all"
+                                className="p-2 hover:bg-[#E0FF67]/20 text-[#E0FF67] hover:text-white rounded-lg transition-all cursor-pointer"
                                 onClick={() => handleOpenEdit(transaction)}
                               >
                                 <Pencil className="w-5 h-5" />
                               </button>
                               <button
-                                className="p-2 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-lg transition-all"
+                                className="p-2 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-lg transition-all cursor-pointer"
                                 onClick={() =>
-                                  handleDeletTransaction(transaction.id)
+                                  handleDeletTransaction(transaction.id) 
                                 }
                               >
                                 <Trash className="w-5 h-5" />
