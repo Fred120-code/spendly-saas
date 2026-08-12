@@ -27,7 +27,10 @@ export class BudgetService {
     budgetId: string,
   ): Promise<BudgetWithTransactions> {
     const budget = await this.repo.findById(budgetId);
-    if (!budget) throw new NotFoundError("Budget introuvable");
+    if (!budget) {
+      notFound()
+      throw new NotFoundError("Budget introuvable");
+    }
     if (budget.userId !== userId)
       throw new ForbiddenError("Ce budget ne vous appartient pas");
     return budget;
@@ -70,3 +73,6 @@ export class BudgetService {
 }
 
 export const budgetService = new BudgetService();
+function notFound() {
+  throw new Error("Function not implemented.");
+}
