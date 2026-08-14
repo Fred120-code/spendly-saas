@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getDashboardDataAction } from "@/modules/dashboard/dashboard.actions";
-import type { Transactions } from "@/type";
+import type { Transactions } from "@/modules/transactions/transaction.types";
 
 interface BudgetDistribution {
   budgetName: string;
