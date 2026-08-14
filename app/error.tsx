@@ -23,10 +23,12 @@ export default function Error({
 
   return (
     <div className="min-h-screen bg-[#151425] flex items-center justify-center px-4">
+
       {/* Halo rouge en arrière-plan */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#FF4C4C]/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative z-10 flex flex-col items-center text-center max-w-md w-full">
+
         {/* Icône */}
         <div className="w-20 h-20 rounded-2xl bg-[#FF4C4C]/10 border border-[#FF4C4C]/20 flex items-center justify-center mb-8">
           <AlertTriangle className="w-10 h-10 text-[#FF4C4C]" />
@@ -36,8 +38,7 @@ export default function Error({
         <p className="text-[120px] font-black leading-none text-transparent bg-clip-text bg-gradient-to-b from-[#FF4C4C] to-[#FF4C4C]/20 select-none mb-2">
           500
         </p>
-
-
+        
         <p className="text-gray-400 text-base leading-relaxed mb-4">
           Une erreur inattendue s&apos;est produite. Vos données sont en
           sécurité — aucune modification n&apos;a été enregistrée.
@@ -76,6 +77,7 @@ export default function Error({
             Tableau de bord
           </Link>
         </div>
+
       </div>
     </div>
   );
