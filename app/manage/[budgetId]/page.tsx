@@ -7,7 +7,7 @@ import {
   updateMyTransactionAction,
 } from "@/modules/transactions/transaction.actions";
 import Wrapper from "@/app/components/Wrapper";
-import { Transactions } from "@/type";
+import { Transactions } from "@/modules/transactions/transaction.types";
 import React, { useEffect, useState } from "react";
 import Notification from "@/app/components/Notification";
 import {

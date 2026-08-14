@@ -3,7 +3,7 @@ import {
   getMyBudgetsAction,
   getMyBudgetByIdAction,
 } from "@/modules/budgets/budget.actions";
-import type { Budgets } from "@/type";
+import type { Budgets } from "@/modules/budgets/budget.types";
 import type { RootState } from "./index";
 
 interface BudgetsState {

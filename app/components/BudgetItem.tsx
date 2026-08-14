@@ -1,4 +1,4 @@
-import { Budgets } from "@/type";
+import { Budgets } from "@/modules/budgets/budget.types";
 import React from "react";
 
 interface BudgetItemProps {
