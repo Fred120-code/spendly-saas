@@ -157,7 +157,7 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
           setNotification("✓ Budget supprimé");
           setTimeout(() => redirect("/budgets"), 1500);
         } catch (error) {
-          console.error("Erreur lors de la suppression du budget");
+          console.error("Erreur lors de la suppression du budget", error);
           setNotification("✗ Erreur lors de la suppression");
         }
       },
