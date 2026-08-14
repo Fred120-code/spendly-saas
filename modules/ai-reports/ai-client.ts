@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { env } from "@/lib/env";
 
 /**
  * "Port" vers le fournisseur IA externe. C'est le SEUL fichier du projet
@@ -14,11 +15,7 @@ class GeminiClient implements IAiClient {
 
   private getModel() {
     if (!this.model) {
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        throw new Error("GEMINI_API_KEY est manquante");
-      }
-      const genAI = new GoogleGenerativeAI(apiKey);
+      const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
       this.model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
     }
     return this.model;
