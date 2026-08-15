@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatMoney, CURRENCY_CODE } from "./money";
+import { formatMoney, CURRENCY_CODE } from "./money/money";
 
 describe("formatMoney", () => {
   it("formate un montant en FCFA", () => {

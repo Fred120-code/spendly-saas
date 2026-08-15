@@ -7,7 +7,7 @@ import {
 import { budgetService } from "@/modules/budgets/budget.service";
 import { userService } from "@/modules/users/user.service";
 import { ValidationError } from "@/lib/errors/app-error";
-import { formatMoney } from "@/lib/money";
+import { formatMoney } from "@/lib/money/money";
 
 interface ReportData {
   budgetName: string;
@@ -39,7 +39,9 @@ export class ReportService {
   async generateMonthlyReport(userId: string): Promise<string> {
     const stats: ReportData[] = await budgetService.getDistributionData(userId);
     if (!stats || stats.length === 0) {
-      throw new ValidationError("Aucune donnée trouvée pour générer un rapport");
+      throw new ValidationError(
+        "Aucune donnée trouvée pour générer un rapport",
+      );
     }
 
     const dataHash = computeDataHash(stats);

@@ -13,7 +13,7 @@ import {
   ValidationError,
   ForbiddenError,
 } from "@/lib/errors/app-error";
-import { formatMoney } from "@/lib/money";
+import { formatMoney } from "@/lib/money/money";
 import { prisma } from "@/lib/prisma";
 
 type PeriodKey = "last7" | "last30" | "last90" | "last365" | "all";
