@@ -31,8 +31,7 @@ const initialState: BudgetsState = {
 };
 
 /**
- * Charge la liste des budgets (page /budgets).
- * Si déjà chargée → ne refait rien.
+ * Charge la liste des budgets 
  */
 export const fetchBudgets = createAsyncThunk(
   "budgets/fetchList",
@@ -44,8 +43,7 @@ export const fetchBudgets = createAsyncThunk(
 );
 
 /**
- * Charge UN budget précis avec ses transactions (page /manage/[budgetId]).
- * Si c'est le même ID que celui déjà en store → ne refait rien.
+ * Charge UN budget précis avec ses transactions
  */
 export const fetchBudgetById = createAsyncThunk(
   "budgets/fetchById",

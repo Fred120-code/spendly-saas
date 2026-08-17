@@ -42,11 +42,6 @@ const initialState: DashboardState = {
   error: null,
 };
 
-/**
- * createAsyncThunk = une action asynchrone Redux.
- * C'est ici qu'on appelle getDashboardDataAction() (ta Server Action).
- * Redux génère automatiquement 3 états : pending, fulfilled, rejected.
- */
 export const fetchDashboardData = createAsyncThunk(
   "dashboard/fechData",
   async (_, { getState }) => {
