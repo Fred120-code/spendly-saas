@@ -5,7 +5,11 @@ import {
   makeBudget,
   makeTransactionRecord,
 } from "./__fixtures__/budget.fixtures";
-import { NotFoundError, ForbiddenError, ValidationError } from "@/lib/errors/app-error";
+import {
+  NotFoundError,
+  ForbiddenError,
+  ValidationError,
+} from "@/lib/errors/app-error";
 
 describe("BudgetService", () => {
   let repo: FakeBudgetRepository;
