@@ -13,7 +13,6 @@ import {
 import {
   Bar,
   BarChart,
-  Cell,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -21,8 +20,8 @@ import {
   AreaChart,
   Area,
 } from "recharts";
-import ChatIA from "../components/ChatIA";
-import RapportAI from "../components/RapportAI";
+// import ChatIA from "../components/ChatIA";
+// import RapportAI from "../components/RapportAI";
 import { fetchDashboardData } from "@/store/dashboardSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { getMyDailyExpenseAction } from "@/modules/transactions/transaction.actions";
@@ -37,9 +36,7 @@ const Page = () => {
     totalCount,
     totalEndBuget,
     budgetData,
-    pieData,
     transactions,
-    dailyExpenses,
     loading,
   } = useAppSelector((state) => state.dashboard);
 

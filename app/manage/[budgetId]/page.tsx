@@ -95,7 +95,7 @@ const Page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
       dispatch(fetchBudgetById(id));
     };
     getId();
-  }, []);
+  }, [params, dispatch]);
 
   const handleAddTransaction = async () => {
     setIsloading(true);
@@ -131,7 +131,7 @@ const Page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
       setIsOpenCreate(false);
       setTimeout(() => setNotification(""), 3000);
     } catch (error) {
-      setNotification("✗ Budget atteint ou erreur lors de l'ajout");
+      setNotification(`Budget atteint ou erreur lors de l'ajout ${error}`);
       setTimeout(() => setNotification(""), 3000);
     } finally {
       setIsloading(false);
@@ -182,7 +182,7 @@ const Page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
           setNotification("✓ Transaction supprimée");
           setTimeout(() => setNotification(""), 3000);
         } catch (error) {
-          setNotification("✗ Erreur lors de la suppression");
+          setNotification(`Erreur lors de la suppression ${error}`);
         }
       },
     });
