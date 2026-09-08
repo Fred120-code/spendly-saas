@@ -27,7 +27,7 @@ import { fetchDashboardData } from "@/store/dashboardSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { getMyDailyExpenseAction } from "@/modules/transactions/transaction.actions";
 
-const page = () => {
+const Page = () => {
   const { user } = useUser();
   const dispatch = useAppDispatch();
 
@@ -569,4 +569,4 @@ function DailyExpensesChart() {
   );
 }
 
-export default page;
+export default Page;

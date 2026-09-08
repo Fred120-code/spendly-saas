@@ -32,7 +32,7 @@ import {
 import { invalidateDashboard } from "@/store/dashboardSlice";
 import ConfirmMoal from "@/app/components/ConfirmModal";
 
-const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
+const Page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
   const dispatch = useAppDispatch();
 
   const [budgetId, setBudgetID] = useState<string>("");
@@ -748,4 +748,4 @@ const page = ({ params }: { params: Promise<{ budgetId: string }> }) => {
   );
 };
 
-export default page;
+export default Page;
