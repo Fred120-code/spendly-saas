@@ -2,7 +2,7 @@
 
 # Étape 1 — deps : installe les dépendances uniquement
 
-FROM node:alpine AS deps
+FROM node:20-alpine AS deps
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -10,11 +10,14 @@ RUN npm ci
 
 # Étape 2 — builder : compile l'application Next.js
 
-FROM node:alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+ARG SKIP_BUILD=false
+ARG SKIP_PRISMA=false
 
 # Variables PUBLIQUES uniquement : elles sont injectées dans le JS envoyé
 # au navigateur pendant le build, donc elles doivent être connues ICI.
@@ -32,10 +35,9 @@ ENV NEXT_PUBLIC_CLERK_SIGN_IN_URL=$NEXT_PUBLIC_CLERK_SIGN_IN_URL
 ENV NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL=$NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL
 ENV NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=$NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL
 
-# prisma generate n'a besoin que du schéma (prisma/schema.prisma), pas d'une
-# vraie connexion à MongoDB — il ne fait que générer le client TypeScript.
-RUN npx prisma generate
-RUN npm run build
+
+RUN if [ "$SKIP_PRISMA" != "true" ]; then npx prisma generate; else echo "Skipping prisma generate (SKIP_PRISMA=true)"; fi
+RUN if [ "$SKIP_BUILD" != "true" ]; then npm run build; else echo "Skipping build (SKIP_BUILD=true)"; fi
 
 # Étape 3 — runner : image finale, minimale, sans outils de build
 FROM node:20-alpine AS runner
