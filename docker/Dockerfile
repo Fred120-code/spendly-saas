@@ -2,7 +2,7 @@
 
 # Étape 1 — deps : installe les dépendances uniquement
 
-FROM node:alpine 
+FROM node:alpine AS deps
 WORKDIR /app
 
 COPY package.json package-lock.json ./
