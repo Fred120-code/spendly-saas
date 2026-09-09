@@ -2,7 +2,7 @@
 
 # Étape 1 — deps : installe les dépendances uniquement
 
-FROM node:20-alpine AS deps
+FROM node:alpine 
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -10,7 +10,7 @@ RUN npm ci
 
 # Étape 2 — builder : compile l'application Next.js
 
-FROM node:20-alpine AS builder
+FROM node:alpine AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
