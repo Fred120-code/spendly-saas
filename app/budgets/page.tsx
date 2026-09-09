@@ -20,7 +20,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchBudgets, invalidateBudgetList } from "@/store/budgetsSlice";
 import { invalidateDashboard } from "@/store/dashboardSlice";
 
-const page = () => {
+const Page = () => {
   const user = useUser();
   const dispatch = useAppDispatch();
 
@@ -331,4 +331,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

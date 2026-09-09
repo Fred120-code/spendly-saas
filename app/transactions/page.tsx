@@ -17,7 +17,7 @@ import { fetchTransactionData } from "@/store/transactionSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { generateCSV, downloadCSV, buildCSVFilename } from "@/lib/utils/csv";
 
-const page = () => {
+const Page = () => {
   const user = useUser();
   const dispatch = useAppDispatch();
 
@@ -424,4 +424,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
