@@ -3,7 +3,6 @@ name: CI
 # Se déclenche sur chaque push sur n'importe quelle branche,
 # et sur chaque Pull Request vers main.
 on:
-  push:
   pull_request:
     branches: [main]
 
