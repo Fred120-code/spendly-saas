@@ -1,10 +1,11 @@
 import FeatureCard from "./FeatureCard";
+import { LucideIcon } from "lucide-react"
 
 interface FeaturesSectionInterface {
-      id: number,
-      icon: any,
-      title: string,
-      description: string,
+  id: number;
+  icon: LucideIcon;
+  title: string;
+  description: string;
 }
 export default function FeaturesSection({
   features,

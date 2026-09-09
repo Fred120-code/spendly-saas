@@ -1,9 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Montserrat } from "next/font/google";
-// @ts-expect-error: allow importing global CSS without type declarations
-import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import StoreProvider from "@/store/StoreProvider";
+import "./globals.css";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
