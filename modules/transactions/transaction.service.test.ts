@@ -1,143 +1,72 @@
-import {
-  transactionRepository,
-  type ITransactionRepository,
-} from "./transaction.repository";
-import {
-  TransactionValidator,
-  type TransactionInput,
-  type TransactionUpdateInput,
-} from "./transaction.validator";
-import { budgetService } from "@/modules/budgets/budget.service";
-import {
-  NotFoundError,
-  ValidationError,
-  ForbiddenError,
-} from "@/lib/errors/app-error";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { TransactionService } from "./transaction.service";
+import type { ITransactionRepository } from "./transaction.repository";
 
-function periodToDateFrom(period: string): Date | undefined {
-  const now = new Date();
-  switch (period) {
-    case "last7": {
-      const d = new Date(now);
-      d.setDate(now.getDate() - 7);
-      return d;
-    }
-    case "last30": {
-      const d = new Date(now);
-      d.setDate(now.getDate() - 30);
-      return d;
-    }
-    case "last90": {
-      const d = new Date(now);
-      d.setDate(now.getDate() - 90);
-      return d;
-    }
-    case "last365": {
-      const d = new Date(now);
-      d.setFullYear(now.getFullYear() - 1);
-      return d;
-    }
-    case "all":
-      return undefined; 
-    default:
-      throw new ValidationError("Période invalide");
-  }
+function formatDate(date: Date): string {
+  return date.toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
+  });
 }
 
-export class TransactionService {
-  constructor(
-    private readonly repo: ITransactionRepository = transactionRepository,
-  ) {}
+describe("TransactionService", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-28T12:00:00.000Z"));
+  });
 
-  async addTransactionToOwnedBudget(userId: string, data: TransactionInput) {
-    TransactionValidator.validateCreateInput(data);
+  afterEach(() => {
+    vi.useRealTimers();
+  });
 
-    const budget = await budgetService.getOwnedBudgetById(
-      userId,
-      data.budgetId,
-    );
+  it("regroupe les dépenses par jour sur la période demandée", async () => {
+    const repo = {
+      findByUserIdAndPeriod: vi.fn().mockResolvedValue([
+        {
+          id: "tx-1",
+          amount: 1000,
+          description: "Courses",
+          emoji: "🛒",
+          budgetId: "budget-1",
+          createdAt: new Date("2026-07-25T09:00:00.000Z"),
+          budgetName: "Courses",
+        },
+        {
+          id: "tx-2",
+          amount: 500,
+          description: "Restaurant",
+          emoji: "🍽️",
+          budgetId: "budget-2",
+          createdAt: new Date("2026-07-28T17:00:00.000Z"),
+          budgetName: "Restaurant",
+        },
+      ]),
+    } as unknown as ITransactionRepository;
 
-    const totalSpent = budget.transactions.reduce(
-      (sum, tx) => sum + tx.amount,
-      0,
-    );
-    if (totalSpent + data.amount > budget.amount) {
-      throw new ValidationError(
-        `Budget insuffisant. Montant disponible : ${budget.amount - totalSpent} FCFA`,
-      );
-    }
+    const service = new TransactionService(repo);
+    const result = await service.getDailyExpenses("user-1", 30);
 
-    return this.repo.create({
-      amount: data.amount,
-      description: data.description,
-      emoji: budget.emoji,
-      budgetId: data.budgetId,
-    });
-  }
+    expect(result).toHaveLength(30);
+    expect(
+      result.find((item) => item.date === formatDate(new Date("2026-07-25")))
+        ?.montant,
+    ).toBe(1000);
+    expect(
+      result.find((item) => item.date === formatDate(new Date("2026-07-28")))
+        ?.montant,
+    ).toBe(500);
+    expect(result.some((item) => item.montant > 0)).toBe(true);
+  });
 
-  async updateOwnedTransaction(
-    userId: string,
-    transactionId: string,
-    data: TransactionUpdateInput,
-  ) {
-    TransactionValidator.validateUpdateInput(data);
+  it("remplit les jours sans transaction avec zéro", async () => {
+    const repo = {
+      findByUserIdAndPeriod: vi.fn().mockResolvedValue([]),
+    } as unknown as ITransactionRepository;
 
-    const transaction = await this.repo.findById(transactionId);
-    if (!transaction) throw new NotFoundError("Transaction introuvable");
-    if (!transaction.budgetId)
-      throw new ForbiddenError("Transaction orpheline, modification refusée");
+    const service = new TransactionService(repo);
+    const result = await service.getDailyExpenses("user-1", 7);
 
-    const budget = await budgetService.getOwnedBudgetById(
-      userId,
-      transaction.budgetId,
-    );
-
-    const totalWithoutThis = budget.transactions
-      .filter((tx) => tx.id !== transactionId)
-      .reduce((sum, tx) => sum + tx.amount, 0);
-
-    if (totalWithoutThis + data.amount > budget.amount) {
-      throw new ValidationError(
-        `Budget insuffisant. Montant disponible : ${budget.amount - totalWithoutThis} FCFA`,
-      );
-    }
-
-    return this.repo.update(transactionId, data);
-  }
-
-  async deleteOwnedTransaction(
-    userId: string,
-    transactionId: string,
-  ): Promise<void> {
-    const transaction = await this.repo.findById(transactionId);
-    if (!transaction) throw new NotFoundError("Transaction introuvable");
-    if (!transaction.budgetId)
-      throw new ForbiddenError("Transaction orpheline, suppression refusée");
-
-    await budgetService.getOwnedBudgetById(userId, transaction.budgetId);
-    await this.repo.delete(transactionId);
-  }
-
-  // --- Méthodes optimisées ---
-
-  async getLastTransactionsForUser(userId: string, limit: number = 5) {
-   
-    return this.repo.findRecentByUserId(userId, limit);
-  }
-
-  async getTransactionsByPeriod(userId: string, period: string) {
-    const from = periodToDateFrom(period);
-    return this.repo.findByUserIdAndPeriod(userId, from);
-  }
-
-  async getTotalAmountForUser(userId: string): Promise<number> {
-    return this.repo.sumAmountByUserId(userId);
-  }
-
-  async getTotalCountForUser(userId: string): Promise<number> {
-
-    return this.repo.countByUserId(userId);
-  }
-}
-
-export const transactionService = new TransactionService();
+    expect(result).toHaveLength(7);
+    expect(result.every((item) => item.montant === 0)).toBe(true);
+  });
+});

@@ -14,6 +14,8 @@ type ServerVar = (typeof REQUIRED_SERVER_VARS)[number];
 type PublicVar = (typeof REQUIRED_PUBLIC_VARS)[number];
 
 function validateEnv() {
+  if (process.env.NODE_ENV === "test") return;
+
   const missing: string[] = [];
 
   for (const key of REQUIRED_SERVER_VARS) {
