@@ -72,3 +72,12 @@ jobs:
             NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
             NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL=/dashboard
             NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/
+      
+      - name: scan Docker image for vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: freddockerhub/spendly:pr-check
+          format: table
+          severity: HIGH,CRITICAL
+          exit-code: 1
+          vuln-type: os,library
