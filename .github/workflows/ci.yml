@@ -72,7 +72,8 @@ jobs:
             NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
             NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL=/dashboard
             NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/
-      
+            
+      # 8. Scan de l'image Docker pour les vulnérabilités
       - name: scan Docker image for vulnerabilities
         uses: aquasecurity/trivy-action@master
         with:
