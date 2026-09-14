@@ -140,7 +140,7 @@ const Page = () => {
           {/* Charts Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Double BarChart — visible uniquement sur grand écran */}
-            <div className="hidden lg:block p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 hover:border-[#E0FF67]/40 transition-all duration-300">
+            <div className="hidden lg:block p-6 lg:p-8 rounded-2xl bg-linear-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 hover:border-[#E0FF67]/40 transition-all duration-300">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-xl font-bold text-white">
                   Budget vs Dépenses
@@ -184,10 +184,13 @@ const Page = () => {
                         color: "#fff",
                         fontSize: "12px",
                       }}
-                      formatter={(value: number, name: string) => [
-                        `${value.toLocaleString("fr-FR")} FCFA`,
-                        name === "totalBudgetAmount" ? "Alloué" : "Dépensé",
-                      ]}
+                      formatter={(value, name) => {
+                        const numericValue = Number(value ?? 0);
+                        return [
+                          `${numericValue.toLocaleString("fr-FR")} FCFA`,
+                          name === "totalBudgetAmount" ? "Alloué" : "Dépensé",
+                        ];
+                      }}
                       cursor={{ fill: "rgba(255,255,255,0.03)" }}
                     />
                     {/* Barre 1 : montant alloué */}
@@ -217,7 +220,7 @@ const Page = () => {
             <DailyExpensesChart />
 
             {/* Sur mobile : version simplifiée à la place du double BarChart */}
-            <div className="lg:hidden p-6 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20">
+            <div className="lg:hidden p-6 rounded-2xl bg-linear-to-br from-white/5 to-white/2 border border-[#E0FF67]/20">
               <h3 className="text-lg font-bold text-white mb-4">Budgets</h3>
               <div className="space-y-4">
                 {budgetData.map((b) => {
@@ -256,7 +259,7 @@ const Page = () => {
           {/* Transactions + colonne IA */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 cursor-pointer">
             {/* Transactions List */}
-            <div className="lg:col-span-2 p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 hover:border-[#E0FF67]/40 transition-all duration-300">
+            <div className="lg:col-span-2 p-6 lg:p-8 rounded-2xl bg-linear-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 hover:border-[#E0FF67]/40 transition-all duration-300">
               {transactions.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 text-center">
                   <Receipt className="w-12 h-12 text-gray-600 mb-4" />
@@ -363,7 +366,7 @@ function KpiCard({
 
   return (
     <div
-      className={`group p-6 lg:p-7 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border ${toneStyles.border} transition-all duration-300 cursor-pointer`}
+      className={`group p-6 lg:p-7 rounded-2xl bg-linear-to-br from-white/5 to-white/2 border ${toneStyles.border} transition-all duration-300 cursor-pointer`}
     >
       <div className="flex items-center justify-between">
         <div className="space-y-2">
@@ -376,7 +379,7 @@ function KpiCard({
           {suffix && <p className="text-xs text-gray-500">{suffix}</p>}
         </div>
         <div
-          className={`p-3.5 bg-gradient-to-br ${toneStyles.iconBg} rounded-xl group-hover:scale-110 transition-transform duration-300`}
+          className={`p-3.5 bg-linear-to-br ${toneStyles.iconBg} rounded-xl group-hover:scale-110 transition-transform duration-300`}
         >
           <Icon className="w-5 h-5 text-[#151425]" />
         </div>
@@ -393,15 +396,15 @@ function DashboardSkeleton() {
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
-            className="h-28 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-white/5"
+            className="h-28 rounded-2xl bg-linear-to-br from-white/5 to-white/2 border border-white/5"
           />
         ))}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 h-80 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-white/5" />
-        <div className="h-80 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-white/5" />
+        <div className="lg:col-span-2 h-80 rounded-2xl bg-linear-to-br from-white/5 to-white/2 border border-white/5" />
+        <div className="h-80 rounded-2xl bg-linear-to-br from-white/5 to-white/2 border border-white/5" />
       </div>
-      <div className="h-64 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-white/5" />
+      <div className="h-64 rounded-2xl bg-linear-to-br from-white/5 to-white/2 border border-white/5" />
     </div>
   );
 }
@@ -453,7 +456,7 @@ function DailyExpensesChart() {
   });
 
   return (
-    <div className="lg:col-span-1 p-6 lg:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 hover:border-[#E0FF67]/40 transition-all duration-300">
+    <div className="lg:col-span-1 p-6 lg:p-8 rounded-2xl bg-linear-to-br from-white/5 to-white/2 border border-[#E0FF67]/20 hover:border-[#E0FF67]/40 transition-all duration-300">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-6">
         <div>
@@ -539,10 +542,13 @@ function DailyExpensesChart() {
                 fontSize: "12px",
                 padding: "8px 12px",
               }}
-              formatter={(value: number) => [
-                `${value.toLocaleString("fr-FR")} FCFA`,
-                "Dépensé",
-              ]}
+              formatter={(value) => {
+                const numericValue = Number(value ?? 0);
+                return [
+                  `${numericValue.toLocaleString("fr-FR")} FCFA`,
+                  "Dépensé",
+                ];
+              }}
               cursor={{ stroke: "rgba(224,255,103,0.15)", strokeWidth: 1 }}
             />
             <Area

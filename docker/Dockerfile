@@ -1,16 +1,13 @@
 # syntax=docker/dockerfile:1
 
-# Étape 1 — deps : installe les dépendances uniquement
-
-FROM node:20-alpine AS deps
+FROM node:22.23.2-alpine3.23 AS deps
 WORKDIR /app
 
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# Étape 2 — builder : compile l'application Next.js
 
-FROM node:20-alpine AS builder
+FROM node:22.23.2-alpine3.23 AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
@@ -18,11 +15,6 @@ COPY . .
 
 ARG SKIP_BUILD=false
 ARG SKIP_PRISMA=false
-
-# Variables PUBLIQUES uniquement : elles sont injectées dans le JS envoyé
-# au navigateur pendant le build, donc elles doivent être connues ICI.
-# Les secrets (CLERK_SECRET_KEY, DATABASE_URL, GEMINI_API_KEY) ne sont PAS
-# nécessaires au build : ils ne seront fournis qu'au lancement du conteneur.
 ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 ARG NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
 ARG NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
@@ -39,8 +31,7 @@ ENV NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=$NEXT_PUBLIC_CLERK_SIGN_UP_FORC
 RUN if [ "$SKIP_PRISMA" != "true" ]; then npx prisma generate; else echo "Skipping prisma generate (SKIP_PRISMA=true)"; fi
 RUN if [ "$SKIP_BUILD" != "true" ]; then npm run build; else echo "Skipping build (SKIP_BUILD=true)"; fi
 
-# Étape 3 — runner : image finale, minimale, sans outils de build
-FROM node:20-alpine AS runner
+FROM node:22.23.2-alpine3.23 AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -50,7 +41,6 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Ne copie QUE ce qui est nécessaire à l'exécution (grâce à output: "standalone")
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
