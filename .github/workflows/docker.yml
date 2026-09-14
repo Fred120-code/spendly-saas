@@ -55,6 +55,14 @@ jobs:
           NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
           NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL: /dashboard
           NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL: /
+      - name: Scan filesystem with Trivy
+        uses: aquasecurity/trivy-action@0.36.0
+        with:
+          scan-type: fs
+          severity: HIGH,CRITICAL
+          exit-code: 1
+          ignore-unfixed: true
+          trivyignores: .trivyignore
 
       # 7. Cache Trivy
       - name: Cache Trivy database
