@@ -65,3 +65,13 @@ jobs:
           tags: |
             freddockerhub/spendly:latest
             freddockerhub/spendly:${{ github.sha }}
+      
+      # 8. Scan de l'image Docker pour les vulnérabilités
+      - name: scan Docker image for vulnerabilities
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: freddockerhub/spendly:${{ github.sha }}
+          format: table
+          severity: HIGH,CRITICAL
+          exit-code: 1
+          vuln-type: os,library
