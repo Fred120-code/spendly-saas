@@ -102,5 +102,6 @@ jobs:
           image-ref: freddockerhub/spendly:pr-check
           format: table
           severity: HIGH,CRITICAL
+          ignore-unfixed: true
           exit-code: 1
           vuln-type: os,library

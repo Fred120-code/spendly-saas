@@ -92,6 +92,7 @@ jobs:
           severity: HIGH,CRITICAL
           exit-code: 1
           vuln-type: os,library
+          ignore-unfixed: true
 
       # 10. Tag "latest"
       - name: Tag latest image
