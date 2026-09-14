@@ -1,32 +1,34 @@
 name: CI
 
-# se declenche uniquement sur les pull requests vers la branche main
 on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   check:
-    name: Lint + Tests + Build
+    name: Lint + Tests + Build + Security
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Récupère le code source
-      - name: Checkout
+      # 1. Récupère le code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Installe Node.js 20
+      # 2. Installe Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "npm"
+          cache: npm
 
       # 3. Installe les dépendances
       - name: Install dependencies
         run: npm ci
 
-      # 3.1 Génère le client Prisma (utilisé pendant le build)
+      # 4. Génère le client Prisma
       - name: Prisma generate
         run: npx prisma generate
         env:
@@ -35,34 +37,54 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
 
-      # 4. Lance ESLint
+      # 5. ESLint
       - name: Lint
         run: npm run lint
 
-      # 5. Lance les tests unitaires Vitest
-      - name: Tests
+      # 6. Tests unitaires
+      - name: Run tests
         run: npm run test
 
-      # 6. Vérifie que le build Next.js passe
-      - name: Build
+      # 7. Vérifie que Next.js build correctement
+      - name: Build Next.js
         run: npm run build
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
           NEXT_PUBLIC_CLERK_SIGN_UP_URL: /sign-up
           NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
           NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL: /dashboard
           NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL: /
 
-      # 7. Build de l'image Docker
+      # 8. Cache la base de données Trivy
+      - name: Cache Trivy database
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trivy
+          key: trivy-db-${{ runner.os }}
+          restore-keys: |
+            trivy-db-
+
+      # 9. Scan du dépôt (dépendances + secrets)
+      - name: Scan repository for vulnerabilities and secrets
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret
+          severity: HIGH,CRITICAL
+          exit-code: 1
+
+      # 10. Build de l'image Docker (sans push)
       - name: Build Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./docker/Dockerfile
           push: false
+          load: true
           tags: freddockerhub/spendly:pr-check
           build-args: |
             SKIP_BUILD=true
@@ -72,5 +94,13 @@ jobs:
             NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
             NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL=/dashboard
             NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/
-            
-      
+
+      # 11. Scan de l'image Docker
+      - name: Scan Docker image for vulnerabilities
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: freddockerhub/spendly:pr-check
+          format: table
+          severity: HIGH,CRITICAL
+          exit-code: 1
+          vuln-type: os,library

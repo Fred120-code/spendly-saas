@@ -4,31 +4,38 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   build-and-push:
-    name: Build and Push Docker Image
+    name: Build, Scan and Push Docker Image
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Code source
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub
+      # 2. Connexion Docker Hub
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Build the app on the runner (uses secrets) so we don't need to embed secrets in the image
+      # 3. Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "npm"
+          cache: npm
 
+      # 4. Dépendances
       - name: Install dependencies
         run: npm ci
 
+      # 5. Prisma
       - name: Prisma generate
         run: npx prisma generate
         env:
@@ -36,6 +43,7 @@ jobs:
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
+      # 6. Build Next.js
       - name: Build Next.js
         run: npm run build
         env:
@@ -48,12 +56,24 @@ jobs:
           NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL: /dashboard
           NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL: /
 
-      - name: Build and push Docker image
+      # 7. Cache Trivy
+      - name: Cache Trivy database
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trivy
+          key: trivy-db-${{ runner.os }}
+          restore-keys: |
+            trivy-db-
+
+      # 8. Build l'image localement (pas encore publiée)
+      - name: Build Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./docker/Dockerfile
-          push: true
+          push: false
+          load: true
+          tags: freddockerhub/spendly:${{ github.sha }}
           build-args: |
             SKIP_BUILD=true
             SKIP_PRISMA=true
@@ -62,12 +82,9 @@ jobs:
             NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
             NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL=/dashboard
             NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/
-          tags: |
-            freddockerhub/spendly:latest
-            freddockerhub/spendly:${{ github.sha }}
-      
-      # 8. Scan de l'image Docker pour les vulnérabilités
-      - name: scan Docker image for vulnerabilities
+
+      # 9. Scan de sécurité
+      - name: Scan Docker image
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: freddockerhub/spendly:${{ github.sha }}
@@ -75,3 +92,16 @@ jobs:
           severity: HIGH,CRITICAL
           exit-code: 1
           vuln-type: os,library
+
+      # 10. Tag "latest"
+      - name: Tag latest image
+        run: |
+          docker tag \
+            freddockerhub/spendly:${{ github.sha }} \
+            freddockerhub/spendly:latest
+
+      # 11. Push uniquement si Trivy est passé
+      - name: Push Docker images
+        run: |
+          docker push freddockerhub/spendly:${{ github.sha }}
+          docker push freddockerhub/spendly:latest
