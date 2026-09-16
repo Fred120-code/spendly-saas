@@ -44,6 +44,10 @@ WORKDIR /app
 # Mise à jour minimale dans l'image finale pour s'assurer des correctifs de sécurité
 RUN apk update && apk upgrade --no-cache
 
+# Supprimer npm/npx pour réduire la surface d'attaque (Trivy)
+RUN rm -rf /usr/local/lib/node_modules/npm
+RUN rm -f /usr/local/bin/npm /usr/local/bin/npx
+
 ENV NODE_ENV=production
 
 # Utilisateur non-root : si jamais le conteneur est compromis, l'attaquant
