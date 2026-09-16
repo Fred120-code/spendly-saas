@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       # 3. Installe les dépendances
@@ -69,6 +69,13 @@ jobs:
           ignore-unfixed: true
           trivyignores: .trivyignore
           exit-code: 1
+          
+      - name: verification de la présence de certains dossiers
+        run: ls -la .next
+             ls -la .next/standalone
+             ls -la .next/static
+             ls -la node_modules/.prisma
+            
 
       # 9. Build de l'image Docker (sans push)
       - name: Build Docker image

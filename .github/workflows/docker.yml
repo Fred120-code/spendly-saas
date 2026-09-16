@@ -28,7 +28,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       # 4. Dépendances
@@ -74,7 +74,7 @@ jobs:
          restore-keys: |
           trivy-db-
 
-      # 8. Build l'image localement (pas encore publiée)
+      # 8. Build l'image localement 
       - name: Build Docker image
         uses: docker/build-push-action@v6
         with:
@@ -92,7 +92,7 @@ jobs:
             NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL=/dashboard
             NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/
 
-      # 9. Scan de sécurité - désactivé temporairement
+      # 9. Scan de sécurité de l'image Docker
       - name: Scan Docker image
         uses: aquasecurity/trivy-action@v0.36.0
         with:
@@ -110,7 +110,7 @@ jobs:
             freddockerhub/spendly:${{ github.sha }} \
             freddockerhub/spendly:latest
 
-      # 11. Push sans validation Trivy (scan temporairement désactivé)
+      # 11. Push des images Docker
       - name: Push Docker images
         run: |
           docker push freddockerhub/spendly:${{ github.sha }}
