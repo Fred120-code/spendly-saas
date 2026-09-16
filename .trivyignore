@@ -1,6 +1,6 @@
-# Prisma CLI uniquement (outil de build)
+# Prisma CLI (deepmerge-ts)
 CVE-2026-40345
 
-# PostCSS embarqué par Next.js 15.5.x
+# PostCSS embarqué par Next.js 15.x
 CVE-2026-45623
 CVE-2026-73646

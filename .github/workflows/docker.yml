@@ -56,23 +56,23 @@ jobs:
           NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL: /dashboard
           NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL: /
 
-      # - name: Scan filesystem with Trivy
-      #   uses: aquasecurity/trivy-action@v0.36.0
-      #   with:
-      #     scan-type: fs
-      #     severity: HIGH,CRITICAL
-      #     exit-code: 1
-      #     ignore-unfixed: true
-      #     trivyignores: .trivyignore
+      - name: Scan filesystem with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          severity: HIGH,CRITICAL
+          exit-code: 1
+          ignore-unfixed: true
+          trivyignores: .trivyignore
 
       # 7. Cache Trivy
-      #   name: Cache Trivy database
-      #   #   uses: actions/cache@v4
-      #   #   with:
-      #   #     path: ~/.cache/trivy
-      #   #     key: trivy-db-${{ runner.os }}
-      #   #     restore-keys: |
-      #       trivy-db-
+      - name: Cache Trivy database
+        uses: actions/cache@v4
+        with:
+         path: ~/.cache/trivy
+         key: trivy-db-${{ runner.os }}
+         restore-keys: |
+          trivy-db-
 
       # 8. Build l'image localement (pas encore publiée)
       - name: Build Docker image
@@ -93,15 +93,15 @@ jobs:
             NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/
 
       # 9. Scan de sécurité - désactivé temporairement
-      # - name: Scan Docker image
-      #   uses: aquasecurity/trivy-action@v0.36.0
-      #   with:
-      #     image-ref: freddockerhub/spendly:${{ github.sha }}
-      #     format: table
-      #     severity: HIGH,CRITICAL
-      #     exit-code: 1
-      #     vuln-type: os,library
-      #     ignore-unfixed: true
+      - name: Scan Docker image
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: freddockerhub/spendly:${{ github.sha }}
+          format: table
+          severity: HIGH,CRITICAL
+          exit-code: 1
+          vuln-type: os,library
+          ignore-unfixed: true
 
       # 10. Tag "latest"
       - name: Tag latest image
