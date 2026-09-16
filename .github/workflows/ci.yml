@@ -93,8 +93,8 @@ jobs:
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: freddockerhub/spendly:pr-check
+          vuln-type: os,library
           format: table
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: 1
-          vuln-type: os,library
