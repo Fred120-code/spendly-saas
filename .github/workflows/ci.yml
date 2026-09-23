@@ -77,7 +77,7 @@ jobs:
           ls -la .next/static
           ls -la node_modules/.prisma
 
-      # 9. Build de l'image Docker (sans push)
+      # 9. Build de l'image Docker
       - name: Build Docker image
         uses: docker/build-push-action@v6
         with:
