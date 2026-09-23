@@ -12,7 +12,7 @@ export const budgetCreateSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(1, "Le nom du budget est obligatoire")
+    .min(4, "Le nom du budget est obligatoire")
     .max(100, "Le nom du budget ne doit pas dépasser 100 caractères"),
   amount: z
     .number()
