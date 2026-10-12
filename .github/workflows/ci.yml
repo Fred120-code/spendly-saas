@@ -69,13 +69,6 @@ jobs:
           ignore-unfixed: true
           trivyignores: .trivyignore
           exit-code: 1
-          
-      - name: Vérifier artefacts build
-        run: |
-          ls -la .next
-          ls -la .next/standalone
-          ls -la .next/static
-          ls -la node_modules/.prisma
 
       # 9. Build de l'image Docker
       - name: Build Docker image
